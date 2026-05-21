@@ -3,11 +3,15 @@ import stripe
 from typing import Optional
 from app.config import settings
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
 class PaymentService:
     def __init__(self):
         self.base_url = settings.BASE_URL
+        self._stripe_initialized = False
+
+    def _init_stripe(self):
+        if not self._stripe_initialized and settings.STRIPE_SECRET_KEY:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            self._stripe_initialized = True
 
     def create_checkout_session(
         self,
@@ -16,6 +20,7 @@ class PaymentService:
         currency: str = "usd"
     ) -> dict:
         """Create a Stripe checkout session for top-up"""
+        self._init_stripe()
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[{
@@ -46,6 +51,7 @@ class PaymentService:
 
     def retrieve_checkout_session(self, session_id: str) -> dict:
         """Retrieve checkout session details"""
+        self._init_stripe()
         session = stripe.checkout.Session.retrieve(session_id)
         return {
             "payment_status": session.payment_status,
@@ -56,6 +62,7 @@ class PaymentService:
 
     def create_refund(self, payment_intent_id: str, amount: Optional[float] = None) -> dict:
         """Create a refund for a payment"""
+        self._init_stripe()
         refund_params = {
             "payment_intent": payment_intent_id,
         }
@@ -73,6 +80,7 @@ class PaymentService:
 
     def construct_webhook_event(self, payload: bytes, sig_header: str) -> stripe.Event:
         """Construct and verify Stripe webhook event"""
+        self._init_stripe()
         return stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
