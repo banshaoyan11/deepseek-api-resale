@@ -59,7 +59,7 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     amount = Column(Float, nullable=False)  # USD
-    transaction_type = Column(Enum("deposit", "refund", "charge"), nullable=False)
+    transaction_type = Column(Enum("deposit", "refund", "charge", name="transaction_type_enum"), nullable=False)
     stripe_payment_id = Column(String(255), nullable=True)
     description = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
