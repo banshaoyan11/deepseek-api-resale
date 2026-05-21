@@ -176,6 +176,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         <div id="pending-payment" class="hidden" style="margin-top:16px;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;">
           <p style="color:#888;margin-bottom:8px;" data-i18n="payment_pending">Payment pending. After completing payment in PayPal, click below:</p>
           <button class="btn btn-primary btn-block" onclick="confirmPayment()" id="confirm-btn" data-i18n="confirm_payment">I've Completed Payment</button>
+          <button class="btn btn-block" onclick="cancelPendingPayment()" style="margin-top:8px;background:#2a2a4a;color:#888;">Cancel Pending Order</button>
         </div>
       </div>
     </div>
@@ -595,6 +596,13 @@ async function doTopUp() {
     btn.textContent = t('pay_with_paypal');
     btn.disabled = false;
   }
+}
+
+function cancelPendingPayment() {
+  pendingOrderId = null;
+  localStorage.removeItem('pending_paypal_order_id');
+  setDisplay('pending-payment', false);
+  toast('Pending order cancelled');
 }
 
 async function confirmPayment() {
