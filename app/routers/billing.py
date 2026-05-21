@@ -26,6 +26,20 @@ async def get_balance(
         "payment_provider": settings.PAYMENT_PROVIDER
     }
 
+@router.post("/test-credit")
+async def test_credit(
+    amount: float = 10.0,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    await billing_service.add_balance(
+        user_id=current_user.id,
+        amount=amount,
+        db=db,
+        stripe_payment_id=f"test_{current_user.id}_{amount}"
+    )
+    return {"status": "credited", "amount": amount, "balance": current_user.balance + amount}
+
 @router.post("/top-up", response_model=TopUpResponse)
 async def create_top_up(
     top_up_data: TopUpRequest,
