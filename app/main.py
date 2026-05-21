@@ -7,6 +7,7 @@ import logging
 
 from app.config import settings
 from app.database import engine, Base
+from app.models import User, APIKey, UsageLog, Transaction, PricingTier
 from app.routers import auth_router, api_keys_router, billing_router, gateway_router
 
 # Configure logging
@@ -20,14 +21,14 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     logger.info("Starting DeepSeek API Resale Platform...")
-    logger.info(f"Database URL: {settings.DATABASE_URL[:50]}...")
 
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created successfully")
     except Exception as e:
-        logger.error(f"Database init error (non-fatal): {e}")
+        logger.error(f"FATAL: Database init failed: {e}")
+        raise
 
     yield
 
