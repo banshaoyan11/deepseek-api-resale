@@ -19,18 +19,20 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
-    # Startup
     logger.info("Starting DeepSeek API Resale Platform...")
+    logger.info(f"Database URL: {settings.DATABASE_URL[:50]}...")
+    logger.info(f"Redis URL: {settings.REDIS_URL[:30]}...")
 
-    # Create database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    logger.info("Database tables created successfully")
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}")
+        raise
 
     yield
 
-    # Shutdown
     logger.info("Shutting down DeepSeek API Resale Platform...")
     await engine.dispose()
 
