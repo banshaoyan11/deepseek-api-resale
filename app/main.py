@@ -21,15 +21,13 @@ async def lifespan(app: FastAPI):
     """Application lifespan events"""
     logger.info("Starting DeepSeek API Resale Platform...")
     logger.info(f"Database URL: {settings.DATABASE_URL[:50]}...")
-    logger.info(f"Redis URL: {settings.REDIS_URL[:30]}...")
 
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created successfully")
     except Exception as e:
-        logger.error(f"Failed to create database tables: {e}")
-        raise
+        logger.error(f"Database init error (non-fatal): {e}")
 
     yield
 
