@@ -91,31 +91,45 @@ async def capture_paypal_order(
     db: AsyncSession = Depends(get_db)
 ):
     """Capture PayPal order after user approval (called from frontend)"""
+    print(f"=== PayPal capture called for order_id: {order_id} ===")
     try:
         # Verify order status
+        print("Getting order details...")
         order = await paypal_service.get_order(order_id)
+        print(f"Order status: {order.get('status')}")
+        print(f"Full order: {order}")
 
         if order["status"] != "COMPLETED":
             # Capture the payment
+            print("Order not completed, capturing...")
             capture_result = await paypal_service.capture_order(order_id)
             order = capture_result
+            print(f"Capture result status: {order.get('status')}")
+            print(f"Full capture result: {order}")
 
         # Extract amount from captured order
         user_id = None
         amount = 0.0
 
+        print("Extracting purchase units...")
         for purchase_unit in order.get("purchase_units", []):
+            print(f"Purchase unit: {purchase_unit}")
             amount = float(purchase_unit["amount"]["value"])
             if "custom_id" in purchase_unit:
                 user_id = int(purchase_unit["custom_id"])
+                print(f"Found custom_id (user_id): {user_id}")
+
+        print(f"Extracted: user_id={user_id}, amount={amount}")
 
         if not user_id:
+            print("ERROR: Missing user_id!")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid order: missing user ID"
             )
 
         # Credit the user's account
+        print(f"Adding balance to user {user_id}...")
         try:
             await billing_service.add_balance(
                 user_id=user_id,
@@ -124,6 +138,7 @@ async def capture_paypal_order(
                 payment_reference=order_id
             )
 
+            print("Balance added successfully!")
             return {
                 "status": "success",
                 "order_id": order_id,
@@ -131,6 +146,7 @@ async def capture_paypal_order(
                 "user_id": user_id
             }
         except ValueError:
+            print("ERROR: User not found!")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
@@ -139,6 +155,9 @@ async def capture_paypal_order(
     except HTTPException:
         raise
     except Exception as e:
+        print(f"ERROR: {str(e)}")
+        import traceback
+        print(f"Stack trace: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"PayPal capture failed: {str(e)}"
