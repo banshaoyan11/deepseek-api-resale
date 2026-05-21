@@ -44,7 +44,7 @@ class BillingService:
         await db.commit()
         return True
 
-    async def add_balance(self, user_id: int, amount: float, db: AsyncSession, stripe_payment_id: Optional[str] = None):
+    async def add_balance(self, user_id: int, amount: float, db: AsyncSession, payment_reference: Optional[str] = None):
         """Add balance to user account"""
         result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
@@ -59,8 +59,8 @@ class BillingService:
             user_id=user_id,
             amount=amount,
             transaction_type="deposit",
-            stripe_payment_id=stripe_payment_id,
-            description=f"Balance top-up via Stripe: ${amount:.2f}"
+            stripe_payment_id=payment_reference,
+            description=f"Balance top-up: ${amount:.2f}"
         )
         db.add(transaction)
 

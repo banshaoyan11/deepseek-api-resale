@@ -56,6 +56,7 @@ async def create_top_up(
 
             return {
                 "checkout_url": paypal_service.get_checkout_url(order["id"]),
+                "session_id": order["id"],
                 "order_id": order["id"],
                 "provider": "paypal"
             }
@@ -120,7 +121,7 @@ async def capture_paypal_order(
                 user_id=user_id,
                 amount=amount,
                 db=db,
-                stripe_payment_id=order_id
+                payment_reference=order_id
             )
 
             return {
@@ -202,7 +203,7 @@ async def stripe_webhook(
                 user_id=user_id,
                 amount=amount,
                 db=db,
-                stripe_payment_id=session["payment_intent"]
+                payment_reference=session["payment_intent"]
             )
         except ValueError:
             raise HTTPException(
