@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     BASE_URL: str = "http://localhost:8000"
 
     # Pricing (USD per million tokens)
-    API_PRICING_INPUT: float = 0.30
-    API_PRICING_OUTPUT: float = 0.50
+    API_PRICING_INPUT: float = 0.50
+    API_PRICING_OUTPUT: float = 1.50
 
     class Config:
         env_file = ".env"
