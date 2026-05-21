@@ -50,7 +50,9 @@ class TopUpRequest(BaseModel):
 
 class TopUpResponse(BaseModel):
     checkout_url: str
-    session_id: str
+    order_id: Optional[str] = None
+    provider: str
+    session_id: Optional[str] = None
 
 class UsageStats(BaseModel):
     period_days: int
