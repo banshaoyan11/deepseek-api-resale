@@ -173,6 +173,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </div>
         <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn" data-i18n="pay_with_paypal">Pay with PayPal</button>
         <div id="topup-error"></div>
+        <div id="pending-payment" class="hidden" style="margin-top:16px;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;">
+          <p style="color:#888;margin-bottom:8px;" data-i18n="payment_pending">Payment pending. After completing payment in PayPal, click below:</p>
+          <button class="btn btn-primary btn-block" onclick="confirmPayment()" id="confirm-btn" data-i18n="confirm_payment">I've Completed Payment</button>
+        </div>
       </div>
     </div>
 
@@ -206,6 +210,7 @@ const API_BASE = window.location.origin;
 let authToken = localStorage.getItem('ds_token') || '';
 let selectedAmount = 10;
 let currentLang = localStorage.getItem('ds_lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+let pendingOrderId = null;
 
 const I18N = {
   en: {
@@ -276,7 +281,10 @@ const I18N = {
     disable: 'Disable',
     api_guide_title: 'How to Use',
     api_guide: 'Use yAPI with any OpenAI-compatible client:',
-    default_key_name: 'Default Key'
+    default_key_name: 'Default Key',
+    payment_pending: 'Payment pending. After completing payment in PayPal, click below:',
+    confirm_payment: "I've Completed Payment",
+    payment_success: 'Payment successful! Balance updated.'
   },
   zh: {
     hero_sub: '高性能 · 低价格 · OpenAI 兼容',
@@ -346,7 +354,10 @@ const I18N = {
     disable: '禁用',
     api_guide_title: '使用指南',
     api_guide: '兼容任何 OpenAI 格式的客户端：',
-    default_key_name: '默认密钥'
+    default_key_name: '默认密钥',
+    payment_pending: '支付进行中。在 PayPal 完成支付后，点击下方按钮：',
+    confirm_payment: '我已完成支付',
+    payment_success: '支付成功！余额已更新。'
   }
 };
 
@@ -556,12 +567,33 @@ async function doTopUp() {
   btn.disabled = true;
   try {
     var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
+    pendingOrderId = data.order_id;
     window.open(data.checkout_url, '_blank');
     toast('Order #' + data.order_id + ' ' + t('order_created'));
+    setDisplay('pending-payment', true);
   } catch(e) {
     showError('topup-error', e.message);
   } finally {
     btn.textContent = t('pay_with_paypal');
+    btn.disabled = false;
+  }
+}
+
+async function confirmPayment() {
+  if (!pendingOrderId) return;
+  var btn = document.getElementById('confirm-btn');
+  btn.textContent = t('loading');
+  btn.disabled = true;
+  try {
+    await api('POST', '/billing/paypal/capture/' + pendingOrderId);
+    toast(t('payment_success'));
+    pendingOrderId = null;
+    setDisplay('pending-payment', false);
+    await loadOverview();
+  } catch(e) {
+    showError('topup-error', e.message);
+  } finally {
+    btn.textContent = t('confirm_payment');
     btn.disabled = false;
   }
 }
