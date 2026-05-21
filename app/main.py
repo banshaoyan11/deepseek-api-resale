@@ -1,9 +1,11 @@
 # app/main.py
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
+import os
 
 from app.config import settings
 from app.database import engine, Base
@@ -54,21 +56,18 @@ app.include_router(api_keys_router)
 app.include_router(billing_router)
 app.include_router(gateway_router)
 
+STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+
 @app.get("/")
 async def root():
-    return {
-        "name": "DeepSeek API Resale Platform",
-        "version": "1.0.0",
-        "status": "operational",
-        "docs": "/docs"
-    }
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"name": "DeepSeek API Resale Platform", "version": "1.0.0", "status": "operational"}
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "timestamp": "2026-05-21T00:00:00Z"
-    }
+    return {"status": "healthy", "timestamp": "2026-05-21T00:00:00Z"}
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

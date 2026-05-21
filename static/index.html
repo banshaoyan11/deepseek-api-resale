@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepSeek API - Token 售卖平台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+.header { text-align: center; padding: 40px 0 20px; }
+.header h1 { font-size: 2em; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.header p { color: #888; font-size: 0.95em; }
+.card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+.card h3 { color: #a78bfa; margin-bottom: 16px; font-size: 1.1em; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; margin-bottom: 6px; color: #999; font-size: 0.85em; }
+.form-group input { width: 100%; padding: 10px 14px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0e0e0; font-size: 0.95em; outline: none; transition: border-color 0.2s; }
+.form-group input:focus { border-color: #6366f1; }
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-danger { background: #dc2626; color: white; }
+.btn-sm { padding: 6px 14px; font-size: 0.82em; }
+.btn-block { width: 100%; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #1a1a2e; border-radius: 10px; padding: 4px; }
+.tab { flex: 1; padding: 10px 16px; text-align: center; border: none; background: transparent; color: #888; cursor: pointer; border-radius: 8px; font-size: 0.9em; transition: all 0.2s; }
+.tab.active { background: #6366f1; color: white; }
+.tab:hover:not(.active) { color: #c0c0c0; }
+.balance { font-size: 2.2em; font-weight: 700; color: #10b981; margin: 8px 0; }
+.balance-label { color: #888; font-size: 0.85em; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+.stat-card { background: #0f0f1a; border-radius: 8px; padding: 16px; text-align: center; }
+.stat-value { font-size: 1.5em; font-weight: 700; color: #a78bfa; }
+.stat-label { font-size: 0.8em; color: #666; margin-top: 4px; }
+.copy-btn { background: #2a2a4a; color: #a78bfa; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 8px; }
+.copy-btn:hover { background: #3a3a5a; }
+.api-key-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0f0f1a; border-radius: 8px; margin-bottom: 8px; }
+.api-key-code { font-family: 'Courier New', monospace; font-size: 0.85em; color: #a78bfa; word-break: break-all; flex: 1; margin-right: 12px; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.75em; }
+.badge-active { background: #065f46; color: #6ee7b7; }
+.badge-inactive { background: #7f1d1d; color: #fca5a5; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 0.9em; }
+.alert-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+.alert-success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 24px; width: 90%; max-width: 450px; }
+.modal h3 { color: #a78bfa; margin-bottom: 16px; }
+.hidden { display: none !important; }
+.loading { text-align: center; padding: 40px; color: #888; }
+.spinner { width: 40px; height: 40px; border: 3px solid #2a2a4a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.topup-amounts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.topup-amt { padding: 10px; text-align: center; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.topup-amt:hover, .topup-amt.selected { border-color: #6366f1; background: #1a1a3e; }
+.topup-amt .price { font-size: 1.1em; font-weight: 700; color: #10b981; }
+.topup-amt .label { font-size: 0.75em; color: #666; }
+.nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.nav-item { padding: 8px 20px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; color: #999; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+.nav-item.active, .nav-item:hover { border-color: #6366f1; color: #a78bfa; }
+.logout { color: #ef4444 !important; border-color: #7f1d1d !important; }
+.toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; color: white; z-index: 200; font-size: 0.9em; animation: slideIn 0.3s ease; }
+.toast-success { background: #065f46; }
+.toast-error { background: #991b1b; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>DeepSeek API Token 售卖</h1>
+    <p>高性能 · 低价格 · OpenAI 兼容</p>
+  </div>
+
+  <!-- ===== AUTH VIEW ===== -->
+  <div id="auth-view">
+    <div class="tabs">
+      <button class="tab active" onclick="switchAuthTab('login')" id="tab-login">登 录</button>
+      <button class="tab" onclick="switchAuthTab('register')" id="tab-register">注 册</button>
+    </div>
+    <div class="card" id="login-form">
+      <h3>登录</h3>
+      <div id="login-error"></div>
+      <div class="form-group"><label>邮箱</label><input type="email" id="login-email" placeholder="请输入邮箱"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="请输入密码"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">登 录</button>
+    </div>
+    <div class="card hidden" id="register-form">
+      <h3>注册</h3>
+      <div id="register-error"></div>
+      <div class="form-group"><label>邮箱</label><input type="email" id="reg-email" placeholder="请输入邮箱"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="reg-password" placeholder="请输入密码(6位以上)"></div>
+      <div class="form-group"><label>昵称（可选）</label><input type="text" id="reg-name" placeholder="请输入昵称"></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()">注 册</button>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD VIEW ===== -->
+  <div id="dashboard-view" class="hidden">
+    <div class="nav">
+      <span class="nav-item active" onclick="switchDashTab('overview')" id="dtab-overview">概览</span>
+      <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys">API Keys</span>
+      <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup">充值</span>
+      <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats">用量统计</span>
+      <span class="nav-item logout" onclick="doLogout()">退出</span>
+    </div>
+
+    <!-- Overview -->
+    <div id="dash-overview">
+      <div class="card">
+        <div class="balance-label">当前余额 (USD)</div>
+        <div class="balance" id="user-balance">$0.00</div>
+        <p style="color:#666;font-size:0.85em;margin-top:4px;">登录用户：<span id="user-email" style="color:#a78bfa;"></span></p>
+      </div>
+      <div id="overview-stats"></div>
+    </div>
+
+    <!-- API Keys -->
+    <div id="dash-apikeys" class="hidden">
+      <div class="card">
+        <h3>创建新 API Key</h3>
+        <div id="apikey-error"></div>
+        <div class="form-group"><label>Key 名称</label><input type="text" id="new-key-name" placeholder="例如：我的开发环境"></div>
+        <button class="btn btn-primary" onclick="createApiKey()">创建 API Key</button>
+      </div>
+      <div class="card">
+        <h3>我的 API Keys</h3>
+        <div id="apikey-list"><div class="loading">加载中...</div></div>
+      </div>
+    </div>
+
+    <!-- Top Up -->
+    <div id="dash-topup" class="hidden">
+      <div class="card">
+        <h3>充值余额（PayPal）</h3>
+        <p style="color:#888;font-size:0.9em;margin-bottom:16px;">选择充值金额，通过 PayPal 安全支付</p>
+        <div class="topup-amounts" id="topup-amounts">
+          <div class="topup-amt selected" onclick="selectTopUp(10)" data-amt="10">
+            <div class="price">$10</div><div class="label">约 33M tokens</div>
+          </div>
+          <div class="topup-amt" onclick="selectTopUp(25)" data-amt="25">
+            <div class="price">$25</div><div class="label">约 83M tokens</div>
+          </div>
+          <div class="topup-amt" onclick="selectTopUp(50)" data-amt="50">
+            <div class="price">$50</div><div class="label">约 166M tokens</div>
+          </div>
+          <div class="topup-amt" onclick="selectTopUp(100)" data-amt="100">
+            <div class="price">$100</div><div class="label">约 333M tokens</div>
+          </div>
+          <div class="topup-amt" onclick="selectTopUp(200)" data-amt="200">
+            <div class="price">$200</div><div class="label">约 666M tokens</div>
+          </div>
+          <div class="topup-amt" onclick="selectTopUp(500)" data-amt="500">
+            <div class="price">$500</div><div class="label">约 1.6B tokens</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn">前往 PayPal 支付</button>
+        <div id="topup-error"></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div id="dash-stats" class="hidden">
+      <div class="card">
+        <h3>用量统计</h3>
+        <div style="margin-bottom:12px;">
+          <label style="color:#888;font-size:0.85em;">统计天数</label>
+          <select id="stats-days" onchange="loadUsageStats()" style="margin-left:8px;padding:6px 12px;background:#0f0f1a;border:1px solid #2a2a4a;color:#e0e0e0;border-radius:6px;">
+            <option value="7">最近 7 天</option>
+            <option value="30" selected>最近 30 天</option>
+            <option value="90">最近 90 天</option>
+          </select>
+        </div>
+        <div class="stats-grid" id="stats-container">
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">请求数</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">输入 Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">输出 Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">总费用</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+const API_BASE = window.location.origin;
+let authToken = '';
+let currentTab = 'overview';
+let selectedAmount = 10;
+
+// ===================== HELPERS =====================
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = `<div class="alert alert-error">${msg}</div>`;
+}
+
+function clearError(id) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = '';
+}
+
+function setLoading(id, text='加载中...') {
+  document.getElementById(id).innerHTML = `<div class="loading"><div class="spinner"></div>${text}</div>`;
+}
+
+function setDisplay(id, show) {
+  document.getElementById(id).classList.toggle('hidden', !show);
+}
+
+async function api(method, path, body=null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+  if (body) opts.body = JSON.stringify(body);
+
+  const res = await fetch(`${API_BASE}${path}`, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || data.message || JSON.stringify(data));
+  return data;
+}
+
+// ===================== AUTH =====================
+function switchAuthTab(tab) {
+  document.querySelectorAll('#auth-view .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  setDisplay('login-form', tab === 'login');
+  setDisplay('register-form', tab === 'register');
+  clearError('login-error');
+  clearError('register-error');
+}
+
+async function doLogin() {
+  clearError('login-error');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showError('login-error', '请填写邮箱和密码');
+  try {
+    const data = await api('POST', '/auth/login', { email, password });
+    authToken = data.access_token;
+    localStorage.setItem('ds_token', authToken);
+    showDashboard();
+    toast('登录成功！');
+  } catch(e) {
+    showError('login-error', e.message);
+  }
+}
+
+async function doRegister() {
+  clearError('register-error');
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const full_name = document.getElementById('reg-name').value.trim() || null;
+  if (!email || !password) return showError('register-error', '请填写邮箱和密码');
+  if (password.length < 6) return showError('register-error', '密码至少6位');
+  try {
+    await api('POST', '/auth/register', { email, password, full_name });
+    toast('注册成功！请登录');
+    switchAuthTab('login');
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-password').value = '';
+    document.getElementById('reg-password').value = '';
+  } catch(e) {
+    showError('register-error', e.message);
+  }
+}
+
+function doLogout() {
+  authToken = '';
+  localStorage.removeItem('ds_token');
+  setDisplay('auth-view', false);
+  setDisplay('dashboard-view', false);
+  setTimeout(() => { setDisplay('auth-view', true); }, 100);
+}
+
+// ===================== DASHBOARD =====================
+function switchDashTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('#dashboard-view .nav-item').forEach(t => t.classList.remove('active'));
+  const el = document.getElementById(`dtab-${tab}`);
+  if (el) el.classList.add('active');
+  ['overview','apikeys','topup','stats'].forEach(t => setDisplay(`dash-${t}`, t === tab));
+
+  if (tab === 'apikeys') loadApiKeys();
+  if (tab === 'stats') loadUsageStats();
+  if (tab === 'overview') loadOverview();
+}
+
+async function showDashboard() {
+  setDisplay('auth-view', false);
+  setDisplay('dashboard-view', true);
+  await loadOverview();
+  switchDashTab('overview');
+}
+
+async function loadOverview() {
+  try {
+    const bal = await api('GET', '/billing/balance');
+    document.getElementById('user-balance').textContent = `$${bal.balance.toFixed(2)}`;
+    const me = await api('GET', '/auth/me');
+    document.getElementById('user-email').textContent = me.email;
+
+    const stats = await api('GET', '/billing/usage/stats?days=30');
+    document.getElementById('overview-stats').innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">${stats.total_requests.toLocaleString()}</div><div class="stat-label">30天请求数</div></div>
+        <div class="stat-card"><div class="stat-value">${stats.total_input_tokens.toLocaleString()}</div><div class="stat-label">输入 Tokens</div></div>
+        <div class="stat-card"><div class="stat-value">${stats.total_output_tokens.toLocaleString()}</div><div class="stat-label">输出 Tokens</div></div>
+        <div class="stat-card"><div class="stat-value">$${stats.total_cost.toFixed(4)}</div><div class="stat-label">30天费用</div></div>
+      </div>`;
+  } catch(e) {
+    toast('加载数据失败: ' + e.message, 'error');
+  }
+}
+
+// ===================== API KEYS =====================
+async function loadApiKeys() {
+  setLoading('apikey-list');
+  try {
+    const keys = await api('GET', '/api-keys/');
+    if (keys.length === 0) {
+      document.getElementById('apikey-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">还没有 API Key，请先创建</p>';
+    } else {
+      document.getElementById('apikey-list').innerHTML = keys.map(k => `
+        <div class="api-key-row">
+          <div style="flex:1;">
+            <div style="font-size:0.95em;margin-bottom:4px;">${k.name}</div>
+            <div class="api-key-code" id="key-${k.id}">${k.key}</div>
+            <div style="font-size:0.75em;color:#666;">创建于 ${new Date(k.created_at).toLocaleDateString()}</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge ${k.is_active ? 'badge-active' : 'badge-inactive'}">${k.is_active ? '活跃' : '已禁用'}</span>
+            <br><br>
+            <button class="copy-btn" onclick="copyKey('${k.key}')">📋 复制</button>
+            ${k.is_active ? `<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deactivateKey(${k.id})">禁用</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    document.getElementById('apikey-list').innerHTML = `<div class="alert alert-error">加载失败: ${e.message}</div>`;
+  }
+}
+
+function copyKey(key) {
+  navigator.clipboard.writeText(key).then(() => toast('已复制 API Key！')).catch(() => toast('复制失败', 'error'));
+}
+
+async function createApiKey() {
+  clearError('apikey-error');
+  const name = document.getElementById('new-key-name').value.trim() || 'Default Key';
+  try {
+    await api('POST', '/api-keys/', { name });
+    toast('API Key 创建成功！');
+    document.getElementById('new-key-name').value = '';
+    await loadApiKeys();
+  } catch(e) {
+    showError('apikey-error', e.message);
+  }
+}
+
+async function deactivateKey(id) {
+  if (!confirm('确定要禁用这个 API Key 吗？')) return;
+  try {
+    await api('POST', `/api-keys/${id}/deactivate`);
+    toast('API Key 已禁用');
+    await loadApiKeys();
+  } catch(e) {
+    toast('操作失败: ' + e.message, 'error');
+  }
+}
+
+// ===================== TOP UP =====================
+function selectTopUp(amt) {
+  selectedAmount = amt;
+  document.querySelectorAll('.topup-amt').forEach(el => el.classList.remove('selected'));
+  document.querySelector(`.topup-amt[data-amt="${amt}"]`).classList.add('selected');
+}
+
+async function doTopUp() {
+  clearError('topup-error');
+  const btn = document.getElementById('topup-btn');
+  btn.textContent = '正在创建订单...';
+  btn.disabled = true;
+  try {
+    const data = await api('POST', '/billing/top-up', { amount: selectedAmount });
+    window.open(data.checkout_url, '_blank');
+    toast(`订单已创建，请在新窗口中完成支付。订单号: ${data.order_id}`);
+  } catch(e) {
+    showError('topup-error', e.message);
+  } finally {
+    btn.textContent = '前往 PayPal 支付';
+    btn.disabled = false;
+  }
+}
+
+// ===================== STATS =====================
+async function loadUsageStats() {
+  const days = document.getElementById('stats-days')?.value || 30;
+  try {
+    const stats = await api('GET', `/billing/usage/stats?days=${days}`);
+    document.getElementById('stats-container').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${stats.total_requests.toLocaleString()}</div><div class="stat-label">请求数</div></div>
+      <div class="stat-card"><div class="stat-value">${stats.total_input_tokens.toLocaleString()}</div><div class="stat-label">输入 Tokens</div></div>
+      <div class="stat-card"><div class="stat-value">${stats.total_output_tokens.toLocaleString()}</div><div class="stat-label">输出 Tokens</div></div>
+      <div class="stat-card"><div class="stat-value">$${stats.total_cost.toFixed(4)}</div><div class="stat-label">总费用</div></div>`;
+  } catch(e) {
+    document.getElementById('stats-container').innerHTML = `<div class="alert alert-error">加载失败</div>`;
+  }
+}
+
+// ===================== INIT =====================
+(function init() {
+  const saved = localStorage.getItem('ds_token');
+  if (saved) {
+    authToken = saved;
+    showDashboard().catch(() => {
+      authToken = '';
+      localStorage.removeItem('ds_token');
+      setDisplay('auth-view', true);
+    });
+  }
+})();
+</script>
+</body>
+</html>
