@@ -8,9 +8,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
 .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-.header { text-align: center; padding: 40px 0 20px; }
+.header { text-align: center; padding: 40px 0 20px; position: relative; }
 .header h1 { font-size: 2em; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
 .header p { color: #888; font-size: 0.95em; }
+.lang-switch { position: absolute; top: 0; right: 0; display: flex; gap: 0; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; overflow: hidden; }
+.lang-switch button { padding: 6px 14px; border: none; background: transparent; color: #888; cursor: pointer; font-size: 0.82em; transition: all 0.2s; }
+.lang-switch button.active { background: #6366f1; color: white; }
+.lang-switch button:hover:not(.active) { color: #c0c0c0; }
+.lang-switch-auth { text-align: right; margin-bottom: 8px; }
 .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
 .card h3 { color: #a78bfa; margin-bottom: 16px; font-size: 1.1em; }
 .form-group { margin-bottom: 14px; }
@@ -52,10 +57,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .topup-amt:hover, .topup-amt.selected { border-color: #6366f1; background: #1a1a3e; }
 .topup-amt .price { font-size: 1.1em; font-weight: 700; color: #10b981; }
 .topup-amt .label { font-size: 0.75em; color: #666; }
-.nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
 .nav-item { padding: 8px 20px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; color: #999; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
 .nav-item.active, .nav-item:hover { border-color: #6366f1; color: #a78bfa; }
 .logout { color: #ef4444 !important; border-color: #7f1d1d !important; }
+.nav-lang { margin-left: auto; display: flex; gap: 0; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; overflow: hidden; }
+.nav-lang button { padding: 6px 12px; border: none; background: transparent; color: #888; cursor: pointer; font-size: 0.78em; transition: all 0.2s; }
+.nav-lang button.active { background: #6366f1; color: white; }
 .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; color: white; z-index: 200; font-size: 0.9em; animation: slideIn 0.3s ease; }
 .toast-success { background: #065f46; }
 .toast-error { background: #991b1b; }
@@ -65,63 +73,72 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .pricing-table th { color: #888; font-size: 0.8em; font-weight: normal; }
 .pricing-table td { color: #e0e0e0; }
 .pricing-table tr:last-child td { border-bottom: none; }
+.i18n-note { color: #888; font-size: 0.78em; line-height: 1.6; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
+    <div class="lang-switch">
+      <button onclick="setLang('en')" id="lang-en">EN</button>
+      <button onclick="setLang('zh')" id="lang-zh">中文</button>
+    </div>
     <h1>DeepSeek API</h1>
-    <p>High-Performance &middot; Low-Cost &middot; OpenAI Compatible</p>
+    <p data-i18n="hero_sub">High-Performance &middot; Low-Cost &middot; OpenAI Compatible</p>
   </div>
 
   <!-- ===== AUTH VIEW ===== -->
   <div id="auth-view">
     <div class="tabs">
-      <button class="tab active" onclick="switchAuthTab('login')" id="tab-login">Sign In</button>
-      <button class="tab" onclick="switchAuthTab('register')" id="tab-register">Sign Up</button>
+      <button class="tab active" onclick="switchAuthTab('login')" id="tab-login" data-i18n="sign_in">Sign In</button>
+      <button class="tab" onclick="switchAuthTab('register')" id="tab-register" data-i18n="sign_up">Sign Up</button>
     </div>
     <div class="card" id="login-form">
-      <h3>Sign In</h3>
+      <h3 data-i18n="sign_in">Sign In</h3>
       <div id="login-error"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="Enter your email"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="Enter your password"></div>
-      <button class="btn btn-primary btn-block" onclick="doLogin()">Sign In</button>
+      <div class="form-group"><label data-i18n="email">Email</label><input type="email" id="login-email" data-i18n-placeholder="email_placeholder"></div>
+      <div class="form-group"><label data-i18n="password">Password</label><input type="password" id="login-password" data-i18n-placeholder="password_placeholder"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()" data-i18n="sign_in_btn">Sign In</button>
     </div>
     <div class="card hidden" id="register-form">
-      <h3>Create Account</h3>
+      <h3 data-i18n="create_account">Create Account</h3>
       <div id="register-error"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="Enter your email"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="At least 6 characters"></div>
-      <div class="form-group"><label>Name (optional)</label><input type="text" id="reg-name" placeholder="Enter your name"></div>
-      <button class="btn btn-primary btn-block" onclick="doRegister()">Create Account</button>
+      <div class="form-group"><label data-i18n="email">Email</label><input type="email" id="reg-email" data-i18n-placeholder="email_placeholder"></div>
+      <div class="form-group"><label data-i18n="password">Password</label><input type="password" id="reg-password" data-i18n-placeholder="password_min6"></div>
+      <div class="form-group"><label data-i18n="name_optional">Name (optional)</label><input type="text" id="reg-name" data-i18n-placeholder="name_placeholder"></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()" data-i18n="create_account_btn">Create Account</button>
     </div>
   </div>
 
   <!-- ===== DASHBOARD VIEW ===== -->
   <div id="dashboard-view" class="hidden">
     <div class="nav">
-      <span class="nav-item active" onclick="switchDashTab('overview')" id="dtab-overview">Overview</span>
-      <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys">API Keys</span>
-      <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup">Top Up</span>
-      <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats">Usage</span>
-      <span class="nav-item logout" onclick="doLogout()">Logout</span>
+      <span class="nav-item active" onclick="switchDashTab('overview')" id="dtab-overview" data-i18n="overview">Overview</span>
+      <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys" data-i18n="api_keys">API Keys</span>
+      <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup" data-i18n="top_up">Top Up</span>
+      <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats" data-i18n="usage">Usage</span>
+      <span class="nav-item logout" onclick="doLogout()" data-i18n="logout">Logout</span>
+      <span class="nav-lang">
+        <button onclick="setLang('en')" id="nav-lang-en">EN</button>
+        <button onclick="setLang('zh')" id="nav-lang-zh">中文</button>
+      </span>
     </div>
 
     <!-- Overview -->
     <div id="dash-overview">
       <div class="card">
-        <div class="balance-label">Current Balance (USD)</div>
+        <div class="balance-label" data-i18n="current_balance">Current Balance (USD)</div>
         <div class="balance" id="user-balance">$0.00</div>
-        <p style="color:#666;font-size:0.85em;margin-top:4px;">Signed in as <span id="user-email" style="color:#a78bfa;"></span></p>
+        <p style="color:#666;font-size:0.85em;margin-top:4px;"><span data-i18n="signed_in_as">Signed in as</span> <span id="user-email" style="color:#a78bfa;"></span></p>
       </div>
       <div class="card">
-        <h3>Pricing</h3>
+        <h3 data-i18n="pricing">Pricing</h3>
         <table class="pricing-table">
-          <tr><th></th><th>Price per 1M tokens</th></tr>
-          <tr><td>Input</td><td>$0.50</td></tr>
-          <tr><td>Output</td><td>$1.50</td></tr>
+          <tr><th></th><th data-i18n="price_per_1m">Price per 1M tokens</th></tr>
+          <tr><td data-i18n="input">Input</td><td>$0.50</td></tr>
+          <tr><td data-i18n="output">Output</td><td>$1.50</td></tr>
         </table>
-        <p style="color:#666;font-size:0.8em;margin-top:8px;">Up to 80% cheaper than OpenAI. No monthly fees, pay only what you use.</p>
+        <p class="i18n-note" data-i18n="pricing_note">Up to 80% cheaper than OpenAI. No monthly fees, pay only what you use.</p>
       </div>
       <div id="overview-stats"></div>
     </div>
@@ -129,23 +146,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <!-- API Keys -->
     <div id="dash-apikeys" class="hidden">
       <div class="card">
-        <h3>Create API Key</h3>
+        <h3 data-i18n="create_api_key">Create API Key</h3>
         <div id="apikey-error"></div>
-        <div class="form-group"><label>Key Name</label><input type="text" id="new-key-name" placeholder="e.g. My Development Key"></div>
-        <button class="btn btn-primary" onclick="createApiKey()">Create API Key</button>
+        <div class="form-group"><label data-i18n="key_name">Key Name</label><input type="text" id="new-key-name" data-i18n-placeholder="key_name_placeholder"></div>
+        <button class="btn btn-primary" onclick="createApiKey()" data-i18n="create_key_btn">Create API Key</button>
       </div>
       <div class="card">
-        <h3>Your API Keys</h3>
-        <p style="color:#666;font-size:0.85em;margin-bottom:12px;">Use these keys to authenticate API requests. Treat them like passwords.</p>
-        <div id="apikey-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        <h3 data-i18n="your_keys">Your API Keys</h3>
+        <p class="i18n-note" style="margin-bottom:12px;" data-i18n="keys_note">Use these keys to authenticate API requests. Treat them like passwords.</p>
+        <div id="apikey-list"><div class="loading"><div class="spinner"></div><span data-i18n="loading">Loading...</span></div></div>
       </div>
     </div>
 
     <!-- Top Up -->
     <div id="dash-topup" class="hidden">
       <div class="card">
-        <h3>Top Up Balance via PayPal</h3>
-        <p style="color:#888;font-size:0.9em;margin-bottom:16px;">Select amount to add credits. Secure payment via PayPal.</p>
+        <h3 data-i18n="topup_title">Top Up Balance via PayPal</h3>
+        <p style="color:#888;font-size:0.9em;margin-bottom:16px;" data-i18n="topup_desc">Select amount to add credits. Secure payment via PayPal.</p>
         <div class="topup-amounts" id="topup-amounts">
           <div class="topup-amt selected" onclick="selectTopUp(10)" data-amt="10"><div class="price">$10</div><div class="label">~10M tokens</div></div>
           <div class="topup-amt" onclick="selectTopUp(25)" data-amt="25"><div class="price">$25</div><div class="label">~25M tokens</div></div>
@@ -154,7 +171,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <div class="topup-amt" onclick="selectTopUp(200)" data-amt="200"><div class="price">$200</div><div class="label">~200M tokens</div></div>
           <div class="topup-amt" onclick="selectTopUp(500)" data-amt="500"><div class="price">$500</div><div class="label">~500M tokens</div></div>
         </div>
-        <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn">Pay with PayPal</button>
+        <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn" data-i18n="pay_with_paypal">Pay with PayPal</button>
         <div id="topup-error"></div>
       </div>
     </div>
@@ -162,20 +179,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <!-- Stats -->
     <div id="dash-stats" class="hidden">
       <div class="card">
-        <h3>Usage Statistics</h3>
+        <h3 data-i18n="usage_stats">Usage Statistics</h3>
         <div style="margin-bottom:14px;">
-          <label style="color:#888;font-size:0.85em;">Period</label>
+          <label style="color:#888;font-size:0.85em;" data-i18n="period">Period</label>
           <select id="stats-days" onchange="loadUsageStats()" style="margin-left:8px;padding:6px 12px;background:#0f0f1a;border:1px solid #2a2a4a;color:#e0e0e0;border-radius:6px;">
-            <option value="7">Last 7 days</option>
-            <option value="30" selected>Last 30 days</option>
-            <option value="90">Last 90 days</option>
+            <option value="7" data-i18n="last_7d">Last 7 days</option>
+            <option value="30" selected data-i18n="last_30d">Last 30 days</option>
+            <option value="90" data-i18n="last_90d">Last 90 days</option>
           </select>
         </div>
         <div class="stats-grid" id="stats-container">
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Requests</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Input Tokens</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Output Tokens</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Total Cost</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="requests">Requests</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="input_tokens">Input Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="output_tokens">Output Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="total_cost">Total Cost</div></div>
         </div>
       </div>
     </div>
@@ -188,9 +205,175 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 const API_BASE = window.location.origin;
 let authToken = localStorage.getItem('ds_token') || '';
 let selectedAmount = 10;
+let currentLang = localStorage.getItem('ds_lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
 
-function toast(msg, type='success') {
-  const el = document.createElement('div');
+const I18N = {
+  en: {
+    hero_sub: 'High-Performance · Low-Cost · OpenAI Compatible',
+    sign_in: 'Sign In',
+    sign_up: 'Sign Up',
+    email: 'Email',
+    password: 'Password',
+    email_placeholder: 'Enter your email',
+    password_placeholder: 'Enter your password',
+    password_min6: 'At least 6 characters',
+    sign_in_btn: 'Sign In',
+    create_account: 'Create Account',
+    create_account_btn: 'Create Account',
+    name_optional: 'Name (optional)',
+    name_placeholder: 'Enter your name',
+    overview: 'Overview',
+    api_keys: 'API Keys',
+    top_up: 'Top Up',
+    usage: 'Usage',
+    logout: 'Logout',
+    current_balance: 'Current Balance (USD)',
+    signed_in_as: 'Signed in as',
+    pricing: 'Pricing',
+    price_per_1m: 'Price per 1M tokens',
+    input: 'Input',
+    output: 'Output',
+    pricing_note: 'Up to 80% cheaper than OpenAI. No monthly fees, pay only what you use.',
+    create_api_key: 'Create API Key',
+    key_name: 'Key Name',
+    key_name_placeholder: 'e.g. My Development Key',
+    create_key_btn: 'Create API Key',
+    your_keys: 'Your API Keys',
+    keys_note: 'Use these keys to authenticate API requests. Treat them like passwords.',
+    loading: 'Loading...',
+    topup_title: 'Top Up Balance via PayPal',
+    topup_desc: 'Select amount to add credits. Secure payment via PayPal.',
+    pay_with_paypal: 'Pay with PayPal',
+    usage_stats: 'Usage Statistics',
+    period: 'Period',
+    last_7d: 'Last 7 days',
+    last_30d: 'Last 30 days',
+    last_90d: 'Last 90 days',
+    requests: 'Requests',
+    input_tokens: 'Input Tokens',
+    output_tokens: 'Output Tokens',
+    total_cost: 'Total Cost',
+    creating_order: 'Creating order...',
+    fill_email_pw: 'Please enter email and password',
+    pw_min6: 'Password must be at least 6 characters',
+    login_success: 'Signed in successfully!',
+    reg_success: 'Account created! Please sign in.',
+    load_failed: 'Failed to load data: ',
+    no_keys: 'No API keys yet. Create one above.',
+    key_created: 'API Key created!',
+    key_copied: 'API Key copied!',
+    copy_failed: 'Copy failed',
+    key_disabled: 'API Key disabled',
+    failed: 'Failed: ',
+    deactivate_confirm: 'Disable this API key? It will stop working immediately.',
+    order_created: 'created. Complete payment in the new window.',
+    fail_load_stats: 'Failed to load stats',
+    req_30d: 'Requests (30d)',
+    created_text: 'Created',
+    active: 'Active',
+    disabled: 'Disabled',
+    copy: 'Copy',
+    disable: 'Disable',
+    api_guide_title: 'How to Use',
+    api_guide: 'Use yAPI with any OpenAI-compatible client:',
+    default_key_name: 'Default Key'
+  },
+  zh: {
+    hero_sub: '高性能 · 低价格 · OpenAI 兼容',
+    sign_in: '登录',
+    sign_up: '注册',
+    email: '邮箱',
+    password: '密码',
+    email_placeholder: '请输入邮箱',
+    password_placeholder: '请输入密码',
+    password_min6: '至少6个字符',
+    sign_in_btn: '登录',
+    create_account: '创建账号',
+    create_account_btn: '注册',
+    name_optional: '昵称（选填）',
+    name_placeholder: '请输入昵称',
+    overview: '概览',
+    api_keys: 'API 密钥',
+    top_up: '充值',
+    usage: '用量',
+    logout: '退出',
+    current_balance: '当前余额 (USD)',
+    signed_in_as: '当前用户',
+    pricing: '定价',
+    price_per_1m: '每 1M tokens 价格',
+    input: '输入',
+    output: '输出',
+    pricing_note: '比 OpenAI 便宜最高 80%。无月费，用多少付多少。',
+    create_api_key: '创建 API 密钥',
+    key_name: '密钥名称',
+    key_name_placeholder: '例如：我的开发密钥',
+    create_key_btn: '创建密钥',
+    your_keys: '我的密钥',
+    keys_note: '使用密钥来调用 API，请像保护密码一样保管好。',
+    loading: '加载中...',
+    topup_title: 'PayPal 充值',
+    topup_desc: '选择金额充值，通过 PayPal 安全支付',
+    pay_with_paypal: '前往 PayPal 支付',
+    usage_stats: '用量统计',
+    period: '统计区间',
+    last_7d: '最近 7 天',
+    last_30d: '最近 30 天',
+    last_90d: '最近 90 天',
+    requests: '请求数',
+    input_tokens: '输入 Tokens',
+    output_tokens: '输出 Tokens',
+    total_cost: '总费用',
+    creating_order: '正在创建订单...',
+    fill_email_pw: '请填写邮箱和密码',
+    pw_min6: '密码至少6个字符',
+    login_success: '登录成功！',
+    reg_success: '注册成功！请登录',
+    load_failed: '加载数据失败：',
+    no_keys: '还没有 API 密钥，请先创建',
+    key_created: 'API 密钥创建成功！',
+    key_copied: '已复制密钥！',
+    copy_failed: '复制失败',
+    key_disabled: 'API 密钥已禁用',
+    failed: '操作失败：',
+    deactivate_confirm: '确定禁用这个密钥吗？禁用后立即失效。',
+    order_created: '订单已创建，请在新窗口中完成支付。',
+    fail_load_stats: '加载统计数据失败',
+    req_30d: '30 天请求数',
+    created_text: '创建于',
+    active: '活跃',
+    disabled: '已禁用',
+    copy: '复制',
+    disable: '禁用',
+    api_guide_title: '使用指南',
+    api_guide: '兼容任何 OpenAI 格式的客户端：',
+    default_key_name: '默认密钥'
+  }
+};
+
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key; }
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ds_lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  [['lang-en','lang-zh'],['nav-lang-en','nav-lang-zh']].forEach(function(pair){
+    var a = document.getElementById(pair[0]), b = document.getElementById(pair[1]);
+    if (a && b) { a.classList.toggle('active', lang==='en'); b.classList.toggle('active', lang==='zh'); }
+  });
+  if (document.getElementById('dashboard-view').classList.contains('hidden') === false) {
+    loadOverview();
+    if (document.getElementById('dash-apikeys').classList.contains('hidden') === false) loadApiKeys();
+  }
+}
+
+function toast(msg, type) {
+  type = type || 'success';
+  var el = document.createElement('div');
   el.className = 'toast toast-' + type;
   el.textContent = msg;
   document.getElementById('toast-container').appendChild(el);
@@ -198,20 +381,17 @@ function toast(msg, type='success') {
 }
 
 function showError(id, msg) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el) el.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
 }
-
 function clearError(id) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el) el.innerHTML = '';
 }
-
 function setLoading(id, text) {
-  text = text || 'Loading...';
+  text = text || t('loading');
   document.getElementById(id).innerHTML = '<div class="loading"><div class="spinner"></div>' + text + '</div>';
 }
-
 function setDisplay(id, show) {
   document.getElementById(id).classList.toggle('hidden', !show);
 }
@@ -240,16 +420,14 @@ async function doLogin() {
   clearError('login-error');
   var email = document.getElementById('login-email').value.trim();
   var password = document.getElementById('login-password').value;
-  if (!email || !password) return showError('login-error', 'Please enter email and password');
+  if (!email || !password) return showError('login-error', t('fill_email_pw'));
   try {
     var data = await api('POST', '/auth/login', { email: email, password: password });
     authToken = data.access_token;
     localStorage.setItem('ds_token', authToken);
     showDashboard();
-    toast('Signed in successfully!');
-  } catch(e) {
-    showError('login-error', e.message);
-  }
+    toast(t('login_success'));
+  } catch(e) { showError('login-error', e.message); }
 }
 
 async function doRegister() {
@@ -257,17 +435,15 @@ async function doRegister() {
   var email = document.getElementById('reg-email').value.trim();
   var password = document.getElementById('reg-password').value;
   var full_name = document.getElementById('reg-name').value.trim() || null;
-  if (!email || !password) return showError('register-error', 'Please enter email and password');
-  if (password.length < 6) return showError('register-error', 'Password must be at least 6 characters');
+  if (!email || !password) return showError('register-error', t('fill_email_pw'));
+  if (password.length < 6) return showError('register-error', t('pw_min6'));
   try {
     await api('POST', '/auth/register', { email: email, password: password, full_name: full_name });
-    toast('Account created! Please sign in.');
+    toast(t('reg_success'));
     switchAuthTab('login');
     document.getElementById('login-email').value = email;
     document.getElementById('login-password').value = '';
-  } catch(e) {
-    showError('register-error', e.message);
-  }
+  } catch(e) { showError('register-error', e.message); }
 }
 
 function doLogout() {
@@ -304,14 +480,12 @@ async function loadOverview() {
     var stats = await api('GET', '/billing/usage/stats?days=30');
     document.getElementById('overview-stats').innerHTML =
       '<div class="stats-grid">' +
-      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">Requests (30d)</div></div>' +
-      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">Input Tokens</div></div>' +
-      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">Output Tokens</div></div>' +
-      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">Total Cost</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">' + t('req_30d') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">' + t('input_tokens') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">' + t('output_tokens') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">' + t('total_cost') + '</div></div>' +
       '</div>';
-  } catch(e) {
-    toast('Failed to load data: ' + e.message, 'error');
-  }
+  } catch(e) { toast(t('load_failed') + e.message, 'error'); }
 }
 
 // API Keys
@@ -320,54 +494,48 @@ async function loadApiKeys() {
   try {
     var keys = await api('GET', '/api-keys/');
     if (keys.length === 0) {
-      document.getElementById('apikey-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">No API keys yet. Create one above.</p>';
+      document.getElementById('apikey-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">' + t('no_keys') + '</p>';
     } else {
       document.getElementById('apikey-list').innerHTML = keys.map(function(k){
         return '<div class="api-key-row">' +
           '<div style="flex:1;">' +
           '<div style="font-size:0.95em;margin-bottom:4px;">' + k.name + '</div>' +
           '<div class="api-key-code" id="key-' + k.id + '">' + k.key + '</div>' +
-          '<div style="font-size:0.75em;color:#666;">Created ' + new Date(k.created_at).toLocaleDateString() + '</div>' +
+          '<div style="font-size:0.75em;color:#666;">' + t('created_text') + ' ' + new Date(k.created_at).toLocaleDateString() + '</div>' +
           '</div>' +
           '<div style="text-align:right;">' +
-          '<span class="badge ' + (k.is_active ? 'badge-active' : 'badge-inactive') + '">' + (k.is_active ? 'Active' : 'Disabled') + '</span>' +
+          '<span class="badge ' + (k.is_active ? 'badge-active' : 'badge-inactive') + '">' + t(k.is_active ? 'active' : 'disabled') + '</span>' +
           '<br><br>' +
-          '<button class="copy-btn" onclick="copyKey(\'' + k.key + '\')">Copy</button>' +
-          (k.is_active ? '<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deactivateKey(' + k.id + ')">Disable</button>' : '') +
+          '<button class="copy-btn" onclick="copyKey(\'' + k.key.replace(/'/g,"\\'") + '\')">' + t('copy') + '</button>' +
+          (k.is_active ? '<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deactivateKey(' + k.id + ')">' + t('disable') + '</button>' : '') +
           '</div></div>';
       }).join('');
     }
-  } catch(e) {
-    document.getElementById('apikey-list').innerHTML = '<div class="alert alert-error">Failed to load: ' + e.message + '</div>';
-  }
+  } catch(e) { document.getElementById('apikey-list').innerHTML = '<div class="alert alert-error">' + t('load_failed') + e.message + '</div>'; }
 }
 
 function copyKey(key) {
-  navigator.clipboard.writeText(key).then(function(){ toast('API Key copied!'); }).catch(function(){ toast('Copy failed', 'error'); });
+  navigator.clipboard.writeText(key).then(function(){ toast(t('key_copied')); }).catch(function(){ toast(t('copy_failed'), 'error'); });
 }
 
 async function createApiKey() {
   clearError('apikey-error');
-  var name = document.getElementById('new-key-name').value.trim() || 'Default Key';
+  var name = document.getElementById('new-key-name').value.trim() || t('default_key_name');
   try {
     await api('POST', '/api-keys/', { name: name });
-    toast('API Key created!');
+    toast(t('key_created'));
     document.getElementById('new-key-name').value = '';
     await loadApiKeys();
-  } catch(e) {
-    showError('apikey-error', e.message);
-  }
+  } catch(e) { showError('apikey-error', e.message); }
 }
 
 async function deactivateKey(id) {
-  if (!confirm('Disable this API key? It will stop working immediately.')) return;
+  if (!confirm(t('deactivate_confirm'))) return;
   try {
     await api('POST', '/api-keys/' + id + '/deactivate');
-    toast('API Key disabled');
+    toast(t('key_disabled'));
     await loadApiKeys();
-  } catch(e) {
-    toast('Failed: ' + e.message, 'error');
-  }
+  } catch(e) { toast(t('failed') + e.message, 'error'); }
 }
 
 // Top Up
@@ -380,16 +548,16 @@ function selectTopUp(amt) {
 async function doTopUp() {
   clearError('topup-error');
   var btn = document.getElementById('topup-btn');
-  btn.textContent = 'Creating order...';
+  btn.textContent = t('creating_order');
   btn.disabled = true;
   try {
     var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
     window.open(data.checkout_url, '_blank');
-    toast('Order #' + data.order_id + ' created. Complete payment in the new window.');
+    toast('Order #' + data.order_id + ' ' + t('order_created'));
   } catch(e) {
     showError('topup-error', e.message);
   } finally {
-    btn.textContent = 'Pay with PayPal';
+    btn.textContent = t('pay_with_paypal');
     btn.disabled = false;
   }
 }
@@ -400,17 +568,16 @@ async function loadUsageStats() {
   try {
     var stats = await api('GET', '/billing/usage/stats?days=' + days);
     document.getElementById('stats-container').innerHTML =
-      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">Requests</div></div>' +
-      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">Input Tokens</div></div>' +
-      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">Output Tokens</div></div>' +
-      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">Total Cost</div></div>';
-  } catch(e) {
-    document.getElementById('stats-container').innerHTML = '<div class="alert alert-error">Failed to load stats</div>';
-  }
+      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">' + t('requests') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">' + t('input_tokens') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">' + t('output_tokens') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">' + t('total_cost') + '</div></div>';
+  } catch(e) { document.getElementById('stats-container').innerHTML = '<div class="alert alert-error">' + t('fail_load_stats') + '</div>'; }
 }
 
 // Init
 (function(){
+  setLang(currentLang);
   if (authToken) {
     showDashboard().catch(function(){
       authToken = '';
@@ -418,6 +585,7 @@ async function loadUsageStats() {
       setDisplay('auth-view', true);
     });
   }
+  setDisplay('auth-view', !authToken);
 })();
 </script>
 </body>
