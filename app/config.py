@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str = "postgresql://user:pass@localhost:5432/deepseek_api"
+    # Database - Railway auto-configures these
+    DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/deepseek_api"
     REDIS_URL: str = "redis://localhost:6379"
 
     # DeepSeek API
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     PAYMENT_PROVIDER: str = "paypal"  # "paypal" or "stripe"
 
     # JWT
-    SECRET_KEY: str
+    SECRET_KEY: str = "your-secret-key-here-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
