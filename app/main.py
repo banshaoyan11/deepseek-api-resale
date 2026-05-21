@@ -10,7 +10,6 @@ from app.database import engine, Base
 from app.models import User, APIKey, UsageLog, Transaction, PricingTier
 from app.routers import auth_router, api_keys_router, billing_router, gateway_router
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -19,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan events"""
     logger.info("Starting DeepSeek API Resale Platform...")
 
     try:
@@ -27,15 +25,13 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created successfully")
     except Exception as e:
-        logger.error(f"FATAL: Database init failed: {e}")
-        raise
+        logger.error(f"DB init failed (app will start anyway): {e}")
 
     yield
 
-    logger.info("Shutting down DeepSeek API Resale Platform...")
+    logger.info("Shutting down...")
     await engine.dispose()
 
-# Create FastAPI app
 app = FastAPI(
     title="DeepSeek API Resale Platform",
     description="OpenAI-compatible API gateway for reselling DeepSeek API tokens",
@@ -45,16 +41,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(auth_router)
 app.include_router(api_keys_router)
 app.include_router(billing_router)
@@ -62,7 +56,6 @@ app.include_router(gateway_router)
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
     return {
         "name": "DeepSeek API Resale Platform",
         "version": "1.0.0",
@@ -72,7 +65,6 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {
         "status": "healthy",
         "timestamp": "2026-05-21T00:00:00Z"
@@ -80,7 +72,6 @@ async def health_check():
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler"""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
