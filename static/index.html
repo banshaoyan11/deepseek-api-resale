@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DeepSeek API - Token 售卖平台</title>
+<title>DeepSeek API - Token Marketplace</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
@@ -43,9 +43,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 0.9em; }
 .alert-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
 .alert-success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 24px; width: 90%; max-width: 450px; }
-.modal h3 { color: #a78bfa; margin-bottom: 16px; }
 .hidden { display: none !important; }
 .loading { text-align: center; padding: 40px; color: #888; }
 .spinner { width: 40px; height: 40px; border: 3px solid #2a2a4a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
@@ -63,54 +60,68 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .toast-success { background: #065f46; }
 .toast-error { background: #991b1b; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.pricing-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9em; }
+.pricing-table th, .pricing-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #2a2a4a; }
+.pricing-table th { color: #888; font-size: 0.8em; font-weight: normal; }
+.pricing-table td { color: #e0e0e0; }
+.pricing-table tr:last-child td { border-bottom: none; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>DeepSeek API Token 售卖</h1>
-    <p>高性能 · 低价格 · OpenAI 兼容</p>
+    <h1>DeepSeek API</h1>
+    <p>High-Performance &middot; Low-Cost &middot; OpenAI Compatible</p>
   </div>
 
   <!-- ===== AUTH VIEW ===== -->
   <div id="auth-view">
     <div class="tabs">
-      <button class="tab active" onclick="switchAuthTab('login')" id="tab-login">登 录</button>
-      <button class="tab" onclick="switchAuthTab('register')" id="tab-register">注 册</button>
+      <button class="tab active" onclick="switchAuthTab('login')" id="tab-login">Sign In</button>
+      <button class="tab" onclick="switchAuthTab('register')" id="tab-register">Sign Up</button>
     </div>
     <div class="card" id="login-form">
-      <h3>登录</h3>
+      <h3>Sign In</h3>
       <div id="login-error"></div>
-      <div class="form-group"><label>邮箱</label><input type="email" id="login-email" placeholder="请输入邮箱"></div>
-      <div class="form-group"><label>密码</label><input type="password" id="login-password" placeholder="请输入密码"></div>
-      <button class="btn btn-primary btn-block" onclick="doLogin()">登 录</button>
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="Enter your email"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="Enter your password"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">Sign In</button>
     </div>
     <div class="card hidden" id="register-form">
-      <h3>注册</h3>
+      <h3>Create Account</h3>
       <div id="register-error"></div>
-      <div class="form-group"><label>邮箱</label><input type="email" id="reg-email" placeholder="请输入邮箱"></div>
-      <div class="form-group"><label>密码</label><input type="password" id="reg-password" placeholder="请输入密码(6位以上)"></div>
-      <div class="form-group"><label>昵称（可选）</label><input type="text" id="reg-name" placeholder="请输入昵称"></div>
-      <button class="btn btn-primary btn-block" onclick="doRegister()">注 册</button>
+      <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="Enter your email"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="At least 6 characters"></div>
+      <div class="form-group"><label>Name (optional)</label><input type="text" id="reg-name" placeholder="Enter your name"></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()">Create Account</button>
     </div>
   </div>
 
   <!-- ===== DASHBOARD VIEW ===== -->
   <div id="dashboard-view" class="hidden">
     <div class="nav">
-      <span class="nav-item active" onclick="switchDashTab('overview')" id="dtab-overview">概览</span>
+      <span class="nav-item active" onclick="switchDashTab('overview')" id="dtab-overview">Overview</span>
       <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys">API Keys</span>
-      <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup">充值</span>
-      <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats">用量统计</span>
-      <span class="nav-item logout" onclick="doLogout()">退出</span>
+      <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup">Top Up</span>
+      <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats">Usage</span>
+      <span class="nav-item logout" onclick="doLogout()">Logout</span>
     </div>
 
     <!-- Overview -->
     <div id="dash-overview">
       <div class="card">
-        <div class="balance-label">当前余额 (USD)</div>
+        <div class="balance-label">Current Balance (USD)</div>
         <div class="balance" id="user-balance">$0.00</div>
-        <p style="color:#666;font-size:0.85em;margin-top:4px;">登录用户：<span id="user-email" style="color:#a78bfa;"></span></p>
+        <p style="color:#666;font-size:0.85em;margin-top:4px;">Signed in as <span id="user-email" style="color:#a78bfa;"></span></p>
+      </div>
+      <div class="card">
+        <h3>Pricing</h3>
+        <table class="pricing-table">
+          <tr><th></th><th>Price per 1M tokens</th></tr>
+          <tr><td>Input</td><td>$0.50</td></tr>
+          <tr><td>Output</td><td>$1.50</td></tr>
+        </table>
+        <p style="color:#666;font-size:0.8em;margin-top:8px;">Up to 80% cheaper than OpenAI. No monthly fees, pay only what you use.</p>
       </div>
       <div id="overview-stats"></div>
     </div>
@@ -118,43 +129,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <!-- API Keys -->
     <div id="dash-apikeys" class="hidden">
       <div class="card">
-        <h3>创建新 API Key</h3>
+        <h3>Create API Key</h3>
         <div id="apikey-error"></div>
-        <div class="form-group"><label>Key 名称</label><input type="text" id="new-key-name" placeholder="例如：我的开发环境"></div>
-        <button class="btn btn-primary" onclick="createApiKey()">创建 API Key</button>
+        <div class="form-group"><label>Key Name</label><input type="text" id="new-key-name" placeholder="e.g. My Development Key"></div>
+        <button class="btn btn-primary" onclick="createApiKey()">Create API Key</button>
       </div>
       <div class="card">
-        <h3>我的 API Keys</h3>
-        <div id="apikey-list"><div class="loading">加载中...</div></div>
+        <h3>Your API Keys</h3>
+        <p style="color:#666;font-size:0.85em;margin-bottom:12px;">Use these keys to authenticate API requests. Treat them like passwords.</p>
+        <div id="apikey-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       </div>
     </div>
 
     <!-- Top Up -->
     <div id="dash-topup" class="hidden">
       <div class="card">
-        <h3>充值余额（PayPal）</h3>
-        <p style="color:#888;font-size:0.9em;margin-bottom:16px;">选择充值金额，通过 PayPal 安全支付</p>
+        <h3>Top Up Balance via PayPal</h3>
+        <p style="color:#888;font-size:0.9em;margin-bottom:16px;">Select amount to add credits. Secure payment via PayPal.</p>
         <div class="topup-amounts" id="topup-amounts">
-          <div class="topup-amt selected" onclick="selectTopUp(10)" data-amt="10">
-            <div class="price">$10</div><div class="label">约 10M tokens</div>
-          </div>
-          <div class="topup-amt" onclick="selectTopUp(25)" data-amt="25">
-            <div class="price">$25</div><div class="label">约 25M tokens</div>
-          </div>
-          <div class="topup-amt" onclick="selectTopUp(50)" data-amt="50">
-            <div class="price">$50</div><div class="label">约 50M tokens</div>
-          </div>
-          <div class="topup-amt" onclick="selectTopUp(100)" data-amt="100">
-            <div class="price">$100</div><div class="label">约 100M tokens</div>
-          </div>
-          <div class="topup-amt" onclick="selectTopUp(200)" data-amt="200">
-            <div class="price">$200</div><div class="label">约 200M tokens</div>
-          </div>
-          <div class="topup-amt" onclick="selectTopUp(500)" data-amt="500">
-            <div class="price">$500</div><div class="label">约 500M tokens</div>
-          </div>
+          <div class="topup-amt selected" onclick="selectTopUp(10)" data-amt="10"><div class="price">$10</div><div class="label">~10M tokens</div></div>
+          <div class="topup-amt" onclick="selectTopUp(25)" data-amt="25"><div class="price">$25</div><div class="label">~25M tokens</div></div>
+          <div class="topup-amt" onclick="selectTopUp(50)" data-amt="50"><div class="price">$50</div><div class="label">~50M tokens</div></div>
+          <div class="topup-amt" onclick="selectTopUp(100)" data-amt="100"><div class="price">$100</div><div class="label">~100M tokens</div></div>
+          <div class="topup-amt" onclick="selectTopUp(200)" data-amt="200"><div class="price">$200</div><div class="label">~200M tokens</div></div>
+          <div class="topup-amt" onclick="selectTopUp(500)" data-amt="500"><div class="price">$500</div><div class="label">~500M tokens</div></div>
         </div>
-        <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn">前往 PayPal 支付</button>
+        <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn">Pay with PayPal</button>
         <div id="topup-error"></div>
       </div>
     </div>
@@ -162,20 +162,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <!-- Stats -->
     <div id="dash-stats" class="hidden">
       <div class="card">
-        <h3>用量统计</h3>
-        <div style="margin-bottom:12px;">
-          <label style="color:#888;font-size:0.85em;">统计天数</label>
+        <h3>Usage Statistics</h3>
+        <div style="margin-bottom:14px;">
+          <label style="color:#888;font-size:0.85em;">Period</label>
           <select id="stats-days" onchange="loadUsageStats()" style="margin-left:8px;padding:6px 12px;background:#0f0f1a;border:1px solid #2a2a4a;color:#e0e0e0;border-radius:6px;">
-            <option value="7">最近 7 天</option>
-            <option value="30" selected>最近 30 天</option>
-            <option value="90">最近 90 天</option>
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
           </select>
         </div>
         <div class="stats-grid" id="stats-container">
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">请求数</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">输入 Tokens</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">输出 Tokens</div></div>
-          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">总费用</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Requests</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Input Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Output Tokens</div></div>
+          <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">Total Cost</div></div>
         </div>
       </div>
     </div>
@@ -186,22 +186,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 <script>
 const API_BASE = window.location.origin;
-let authToken = '';
-let currentTab = 'overview';
+let authToken = localStorage.getItem('ds_token') || '';
 let selectedAmount = 10;
 
-// ===================== HELPERS =====================
 function toast(msg, type='success') {
   const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
+  el.className = 'toast toast-' + type;
   el.textContent = msg;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(function(){ el.remove(); }, 3000);
 }
 
 function showError(id, msg) {
   const el = document.getElementById(id);
-  if (el) el.innerHTML = `<div class="alert alert-error">${msg}</div>`;
+  if (el) el.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
 }
 
 function clearError(id) {
@@ -209,32 +207,29 @@ function clearError(id) {
   if (el) el.innerHTML = '';
 }
 
-function setLoading(id, text='加载中...') {
-  document.getElementById(id).innerHTML = `<div class="loading"><div class="spinner"></div>${text}</div>`;
+function setLoading(id, text) {
+  text = text || 'Loading...';
+  document.getElementById(id).innerHTML = '<div class="loading"><div class="spinner"></div>' + text + '</div>';
 }
 
 function setDisplay(id, show) {
   document.getElementById(id).classList.toggle('hidden', !show);
 }
 
-async function api(method, path, body=null) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json' }
-  };
-  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+async function api(method, path, body) {
+  var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
+  if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
   if (body) opts.body = JSON.stringify(body);
-
-  const res = await fetch(`${API_BASE}${path}`, opts);
-  const data = await res.json();
+  var res = await fetch(API_BASE + path, opts);
+  var data = await res.json();
   if (!res.ok) throw new Error(data.detail || data.message || JSON.stringify(data));
   return data;
 }
 
-// ===================== AUTH =====================
+// Auth
 function switchAuthTab(tab) {
-  document.querySelectorAll('#auth-view .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('#auth-view .tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
   setDisplay('login-form', tab === 'login');
   setDisplay('register-form', tab === 'register');
   clearError('login-error');
@@ -243,15 +238,15 @@ function switchAuthTab(tab) {
 
 async function doLogin() {
   clearError('login-error');
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  if (!email || !password) return showError('login-error', '请填写邮箱和密码');
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  if (!email || !password) return showError('login-error', 'Please enter email and password');
   try {
-    const data = await api('POST', '/auth/login', { email, password });
+    var data = await api('POST', '/auth/login', { email: email, password: password });
     authToken = data.access_token;
     localStorage.setItem('ds_token', authToken);
     showDashboard();
-    toast('登录成功！');
+    toast('Signed in successfully!');
   } catch(e) {
     showError('login-error', e.message);
   }
@@ -259,18 +254,17 @@ async function doLogin() {
 
 async function doRegister() {
   clearError('register-error');
-  const email = document.getElementById('reg-email').value.trim();
-  const password = document.getElementById('reg-password').value;
-  const full_name = document.getElementById('reg-name').value.trim() || null;
-  if (!email || !password) return showError('register-error', '请填写邮箱和密码');
-  if (password.length < 6) return showError('register-error', '密码至少6位');
+  var email = document.getElementById('reg-email').value.trim();
+  var password = document.getElementById('reg-password').value;
+  var full_name = document.getElementById('reg-name').value.trim() || null;
+  if (!email || !password) return showError('register-error', 'Please enter email and password');
+  if (password.length < 6) return showError('register-error', 'Password must be at least 6 characters');
   try {
-    await api('POST', '/auth/register', { email, password, full_name });
-    toast('注册成功！请登录');
+    await api('POST', '/auth/register', { email: email, password: password, full_name: full_name });
+    toast('Account created! Please sign in.');
     switchAuthTab('login');
     document.getElementById('login-email').value = email;
     document.getElementById('login-password').value = '';
-    document.getElementById('reg-password').value = '';
   } catch(e) {
     showError('register-error', e.message);
   }
@@ -279,19 +273,16 @@ async function doRegister() {
 function doLogout() {
   authToken = '';
   localStorage.removeItem('ds_token');
-  setDisplay('auth-view', false);
   setDisplay('dashboard-view', false);
-  setTimeout(() => { setDisplay('auth-view', true); }, 100);
+  setDisplay('auth-view', true);
 }
 
-// ===================== DASHBOARD =====================
+// Dashboard
 function switchDashTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('#dashboard-view .nav-item').forEach(t => t.classList.remove('active'));
-  const el = document.getElementById(`dtab-${tab}`);
+  document.querySelectorAll('#dashboard-view .nav-item').forEach(function(t){ t.classList.remove('active'); });
+  var el = document.getElementById('dtab-' + tab);
   if (el) el.classList.add('active');
-  ['overview','apikeys','topup','stats'].forEach(t => setDisplay(`dash-${t}`, t === tab));
-
+  ['overview','apikeys','topup','stats'].forEach(function(t){ setDisplay('dash-' + t, t === tab); });
   if (tab === 'apikeys') loadApiKeys();
   if (tab === 'stats') loadUsageStats();
   if (tab === 'overview') loadOverview();
@@ -306,63 +297,61 @@ async function showDashboard() {
 
 async function loadOverview() {
   try {
-    const bal = await api('GET', '/billing/balance');
-    document.getElementById('user-balance').textContent = `$${bal.balance.toFixed(2)}`;
-    const me = await api('GET', '/auth/me');
+    var bal = await api('GET', '/billing/balance');
+    document.getElementById('user-balance').textContent = '$' + bal.balance.toFixed(2);
+    var me = await api('GET', '/auth/me');
     document.getElementById('user-email').textContent = me.email;
-
-    const stats = await api('GET', '/billing/usage/stats?days=30');
-    document.getElementById('overview-stats').innerHTML = `
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value">${stats.total_requests.toLocaleString()}</div><div class="stat-label">30天请求数</div></div>
-        <div class="stat-card"><div class="stat-value">${stats.total_input_tokens.toLocaleString()}</div><div class="stat-label">输入 Tokens</div></div>
-        <div class="stat-card"><div class="stat-value">${stats.total_output_tokens.toLocaleString()}</div><div class="stat-label">输出 Tokens</div></div>
-        <div class="stat-card"><div class="stat-value">$${stats.total_cost.toFixed(4)}</div><div class="stat-label">30天费用</div></div>
-      </div>`;
+    var stats = await api('GET', '/billing/usage/stats?days=30');
+    document.getElementById('overview-stats').innerHTML =
+      '<div class="stats-grid">' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">Requests (30d)</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">Input Tokens</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">Output Tokens</div></div>' +
+      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">Total Cost</div></div>' +
+      '</div>';
   } catch(e) {
-    toast('加载数据失败: ' + e.message, 'error');
+    toast('Failed to load data: ' + e.message, 'error');
   }
 }
 
-// ===================== API KEYS =====================
+// API Keys
 async function loadApiKeys() {
   setLoading('apikey-list');
   try {
-    const keys = await api('GET', '/api-keys/');
+    var keys = await api('GET', '/api-keys/');
     if (keys.length === 0) {
-      document.getElementById('apikey-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">还没有 API Key，请先创建</p>';
+      document.getElementById('apikey-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">No API keys yet. Create one above.</p>';
     } else {
-      document.getElementById('apikey-list').innerHTML = keys.map(k => `
-        <div class="api-key-row">
-          <div style="flex:1;">
-            <div style="font-size:0.95em;margin-bottom:4px;">${k.name}</div>
-            <div class="api-key-code" id="key-${k.id}">${k.key}</div>
-            <div style="font-size:0.75em;color:#666;">创建于 ${new Date(k.created_at).toLocaleDateString()}</div>
-          </div>
-          <div style="text-align:right;">
-            <span class="badge ${k.is_active ? 'badge-active' : 'badge-inactive'}">${k.is_active ? '活跃' : '已禁用'}</span>
-            <br><br>
-            <button class="copy-btn" onclick="copyKey('${k.key}')">📋 复制</button>
-            ${k.is_active ? `<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deactivateKey(${k.id})">禁用</button>` : ''}
-          </div>
-        </div>
-      `).join('');
+      document.getElementById('apikey-list').innerHTML = keys.map(function(k){
+        return '<div class="api-key-row">' +
+          '<div style="flex:1;">' +
+          '<div style="font-size:0.95em;margin-bottom:4px;">' + k.name + '</div>' +
+          '<div class="api-key-code" id="key-' + k.id + '">' + k.key + '</div>' +
+          '<div style="font-size:0.75em;color:#666;">Created ' + new Date(k.created_at).toLocaleDateString() + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+          '<span class="badge ' + (k.is_active ? 'badge-active' : 'badge-inactive') + '">' + (k.is_active ? 'Active' : 'Disabled') + '</span>' +
+          '<br><br>' +
+          '<button class="copy-btn" onclick="copyKey(\'' + k.key + '\')">Copy</button>' +
+          (k.is_active ? '<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deactivateKey(' + k.id + ')">Disable</button>' : '') +
+          '</div></div>';
+      }).join('');
     }
   } catch(e) {
-    document.getElementById('apikey-list').innerHTML = `<div class="alert alert-error">加载失败: ${e.message}</div>`;
+    document.getElementById('apikey-list').innerHTML = '<div class="alert alert-error">Failed to load: ' + e.message + '</div>';
   }
 }
 
 function copyKey(key) {
-  navigator.clipboard.writeText(key).then(() => toast('已复制 API Key！')).catch(() => toast('复制失败', 'error'));
+  navigator.clipboard.writeText(key).then(function(){ toast('API Key copied!'); }).catch(function(){ toast('Copy failed', 'error'); });
 }
 
 async function createApiKey() {
   clearError('apikey-error');
-  const name = document.getElementById('new-key-name').value.trim() || 'Default Key';
+  var name = document.getElementById('new-key-name').value.trim() || 'Default Key';
   try {
-    await api('POST', '/api-keys/', { name });
-    toast('API Key 创建成功！');
+    await api('POST', '/api-keys/', { name: name });
+    toast('API Key created!');
     document.getElementById('new-key-name').value = '';
     await loadApiKeys();
   } catch(e) {
@@ -371,61 +360,59 @@ async function createApiKey() {
 }
 
 async function deactivateKey(id) {
-  if (!confirm('确定要禁用这个 API Key 吗？')) return;
+  if (!confirm('Disable this API key? It will stop working immediately.')) return;
   try {
-    await api('POST', `/api-keys/${id}/deactivate`);
-    toast('API Key 已禁用');
+    await api('POST', '/api-keys/' + id + '/deactivate');
+    toast('API Key disabled');
     await loadApiKeys();
   } catch(e) {
-    toast('操作失败: ' + e.message, 'error');
+    toast('Failed: ' + e.message, 'error');
   }
 }
 
-// ===================== TOP UP =====================
+// Top Up
 function selectTopUp(amt) {
   selectedAmount = amt;
-  document.querySelectorAll('.topup-amt').forEach(el => el.classList.remove('selected'));
-  document.querySelector(`.topup-amt[data-amt="${amt}"]`).classList.add('selected');
+  document.querySelectorAll('.topup-amt').forEach(function(el){ el.classList.remove('selected'); });
+  document.querySelector('.topup-amt[data-amt="' + amt + '"]').classList.add('selected');
 }
 
 async function doTopUp() {
   clearError('topup-error');
-  const btn = document.getElementById('topup-btn');
-  btn.textContent = '正在创建订单...';
+  var btn = document.getElementById('topup-btn');
+  btn.textContent = 'Creating order...';
   btn.disabled = true;
   try {
-    const data = await api('POST', '/billing/top-up', { amount: selectedAmount });
+    var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
     window.open(data.checkout_url, '_blank');
-    toast(`订单已创建，请在新窗口中完成支付。订单号: ${data.order_id}`);
+    toast('Order #' + data.order_id + ' created. Complete payment in the new window.');
   } catch(e) {
     showError('topup-error', e.message);
   } finally {
-    btn.textContent = '前往 PayPal 支付';
+    btn.textContent = 'Pay with PayPal';
     btn.disabled = false;
   }
 }
 
-// ===================== STATS =====================
+// Stats
 async function loadUsageStats() {
-  const days = document.getElementById('stats-days')?.value || 30;
+  var days = document.getElementById('stats-days') ? document.getElementById('stats-days').value : 30;
   try {
-    const stats = await api('GET', `/billing/usage/stats?days=${days}`);
-    document.getElementById('stats-container').innerHTML = `
-      <div class="stat-card"><div class="stat-value">${stats.total_requests.toLocaleString()}</div><div class="stat-label">请求数</div></div>
-      <div class="stat-card"><div class="stat-value">${stats.total_input_tokens.toLocaleString()}</div><div class="stat-label">输入 Tokens</div></div>
-      <div class="stat-card"><div class="stat-value">${stats.total_output_tokens.toLocaleString()}</div><div class="stat-label">输出 Tokens</div></div>
-      <div class="stat-card"><div class="stat-value">$${stats.total_cost.toFixed(4)}</div><div class="stat-label">总费用</div></div>`;
+    var stats = await api('GET', '/billing/usage/stats?days=' + days);
+    document.getElementById('stats-container').innerHTML =
+      '<div class="stat-card"><div class="stat-value">' + stats.total_requests.toLocaleString() + '</div><div class="stat-label">Requests</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_input_tokens.toLocaleString() + '</div><div class="stat-label">Input Tokens</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.total_output_tokens.toLocaleString() + '</div><div class="stat-label">Output Tokens</div></div>' +
+      '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">Total Cost</div></div>';
   } catch(e) {
-    document.getElementById('stats-container').innerHTML = `<div class="alert alert-error">加载失败</div>`;
+    document.getElementById('stats-container').innerHTML = '<div class="alert alert-error">Failed to load stats</div>';
   }
 }
 
-// ===================== INIT =====================
-(function init() {
-  const saved = localStorage.getItem('ds_token');
-  if (saved) {
-    authToken = saved;
-    showDashboard().catch(() => {
+// Init
+(function(){
+  if (authToken) {
+    showDashboard().catch(function(){
       authToken = '';
       localStorage.removeItem('ds_token');
       setDisplay('auth-view', true);
