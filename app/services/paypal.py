@@ -9,6 +9,7 @@ class PayPalService:
         self.client_id = settings.PAYPAL_CLIENT_ID
         self.client_secret = settings.PAYPAL_CLIENT_SECRET
         self.base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_SANDBOX else "https://api-m.paypal.com"
+        self.site_url = settings.BASE_URL
         self.access_token = None
 
     async def get_access_token(self) -> str:
@@ -49,7 +50,15 @@ class PayPalService:
                 },
                 "description": "DeepSeek API Credits",
                 "custom_id": str(user_id) if user_id else None
-            }]
+            }],
+            "application_context": {
+                "return_url": f"{self.site_url}",
+                "cancel_url": f"{self.site_url}",
+                "brand_name": "DeepSeek API Resale",
+                "landing_page": "LOGIN",
+                "shipping_preference": "NO_SHIPPING",
+                "user_action": "PAY_NOW"
+            }
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:

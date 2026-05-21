@@ -477,12 +477,29 @@ function switchDashTab(tab) {
   if (tab === 'apikeys') loadApiKeys();
   if (tab === 'stats') loadUsageStats();
   if (tab === 'overview') loadOverview();
+  
+  // Check for pending PayPal order when switching to topup
+  if (tab === 'topup') {
+    var savedOrderId = localStorage.getItem('pending_paypal_order_id');
+    if (savedOrderId) {
+      pendingOrderId = savedOrderId;
+      setDisplay('pending-payment', true);
+    }
+  }
 }
 
 async function showDashboard() {
   setDisplay('auth-view', false);
   setDisplay('dashboard-view', true);
   await loadOverview();
+  
+  // Check for pending PayPal order in localStorage
+  var savedOrderId = localStorage.getItem('pending_paypal_order_id');
+  if (savedOrderId) {
+    pendingOrderId = savedOrderId;
+    setDisplay('pending-payment', true);
+  }
+  
   switchDashTab('overview');
 }
 
@@ -568,6 +585,7 @@ async function doTopUp() {
   try {
     var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
     pendingOrderId = data.order_id;
+    localStorage.setItem('pending_paypal_order_id', data.order_id);
     window.open(data.checkout_url, '_blank');
     toast('Order #' + data.order_id + ' ' + t('order_created'));
     setDisplay('pending-payment', true);
@@ -588,6 +606,7 @@ async function confirmPayment() {
     await api('POST', '/billing/paypal/capture/' + pendingOrderId);
     toast(t('payment_success'));
     pendingOrderId = null;
+    localStorage.removeItem('pending_paypal_order_id');
     setDisplay('pending-payment', false);
     await loadOverview();
   } catch(e) {
