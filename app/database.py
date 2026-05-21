@@ -1,4 +1,5 @@
 # app/database.py
+import re
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
@@ -7,10 +8,14 @@ _db_url = settings.DATABASE_URL
 _db_url = _db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 _db_url = _db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
+if "?" not in _db_url:
+    _db_url += "?ssl=require"
+elif "ssl" not in _db_url:
+    _db_url += "&ssl=require"
+
 engine = create_async_engine(
     _db_url,
-    echo=settings.DEBUG,
-    connect_args={"ssl": "require"},
+    echo=True,
     pool_pre_ping=True,
     pool_recycle=300,
 )
