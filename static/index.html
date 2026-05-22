@@ -100,6 +100,40 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .pricing-compare .price-high { color: #f87171; }
 .pricing-compare .savings-badge { display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 700; margin-left: 6px; }
 .pricing-compare .hero-tag { display: inline-block; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.68em; font-weight: 600; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.feature-item { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px; padding: 14px; text-align: center; }
+.feature-item .fi-icon { font-size: 1.3em; margin-bottom: 4px; }
+.feature-item .fi-title { color: #a78bfa; font-weight: 600; font-size: 0.85em; margin-bottom: 4px; }
+.feature-item .fi-desc { color: #888; font-size: 0.75em; line-height: 1.4; }
+.playground { margin-bottom: 16px; }
+.playground .card { padding: 16px; }
+.playground-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.playground-header h3 { margin: 0; }
+.playground-remaining { font-size: 0.75em; color: #888; }
+.playground-msgs { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px; min-height: 180px; max-height: 320px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+.pg-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 0.85em; line-height: 1.5; word-break: break-word; }
+.pg-msg.user { align-self: flex-end; background: linear-gradient(135deg, #6366f1, #7c3aed); color: white; border-bottom-right-radius: 4px; }
+.pg-msg.ai { align-self: flex-start; background: #1a1a2e; border: 1px solid #2a2a4a; color: #e0e0e0; border-bottom-left-radius: 4px; }
+.pg-msg.ai pre { background: #0a0a14; padding: 8px; border-radius: 6px; font-size: 0.78em; overflow-x: auto; margin: 6px 0; }
+.pg-msg.ai code { background: #2a2a4a; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+.pg-placeholder { color: #555; text-align: center; padding: 40px 0; font-size: 0.85em; }
+.pg-input-row { display: flex; gap: 8px; }
+.pg-input-row input { flex: 1; padding: 10px 14px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #e0e0e0; font-size: 0.9em; outline: none; }
+.pg-input-row input:focus { border-color: #6366f1; }
+.pg-input-row button { padding: 10px 20px; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: 500; white-space: nowrap; }
+.pg-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+.pg-model-pick { display: flex; gap: 6px; margin-bottom: 8px; }
+.pg-model-pick button { padding: 4px 12px; border: 1px solid #2a2a4a; background: #0f0f1a; color: #888; border-radius: 14px; cursor: pointer; font-size: 0.72em; }
+.pg-model-pick button.active { border-color: #6366f1; color: #a78bfa; background: #1a1a3e; }
+.reseller-compare { overflow-x: auto; }
+.reseller-compare table { width: 100%; border-collapse: collapse; font-size: 0.8em; min-width: 500px; }
+.reseller-compare th { padding: 8px 10px; text-align: center; border-bottom: 1px solid #2a2a4a; color: #888; font-size: 0.75em; font-weight: normal; }
+.reseller-compare th:first-child { text-align: left; }
+.reseller-compare td { padding: 8px 10px; text-align: center; border-bottom: 1px solid #1a1a2e; color: #c0c0c0; }
+.reseller-compare td:first-child { text-align: left; color: #e0e0e0; }
+.reseller-compare .check { color: #10b981; }
+.reseller-compare .cross { color: #f87171; }
+.reseller-compare .our-col { background: rgba(99, 102, 241, 0.06); }
 </style>
 </head>
 <body>
@@ -115,6 +149,54 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
   <!-- ===== AUTH VIEW ===== -->
   <div id="auth-view">
+    <!-- Feature Highlights -->
+    <div class="feature-grid">
+      <div class="feature-item">
+        <div class="fi-icon">⚡</div>
+        <div class="fi-title" data-i18n="feature_full_title">Full V4 — Not Distilled</div>
+        <div class="fi-desc" data-i18n="feature_full_desc">Official DeepSeek V4 API. No quantization, no distillation, no compromises.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">🚀</div>
+        <div class="fi-title" data-i18n="feature_rate_title">No Rate Limits</div>
+        <div class="fi-desc" data-i18n="feature_rate_desc">Unlimited throughput. No RPM/TPM caps. Full speed, always.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">📚</div>
+        <div class="fi-title" data-i18n="feature_context_title">1M Context Window</div>
+        <div class="fi-desc" data-i18n="feature_context_desc">Process entire codebases or books in one shot. 5× more than GPT-4o.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">🔌</div>
+        <div class="fi-title" data-i18n="feature_compat_title">OpenAI Compatible</div>
+        <div class="fi-desc" data-i18n="feature_compat_desc">Drop-in replacement. Works with any OpenAI SDK, tool, or client.</div>
+      </div>
+    </div>
+
+    <!-- Chat Playground -->
+    <div class="playground">
+      <div class="card">
+        <div class="playground-header">
+          <h3>
+            <span data-i18n="pg_title">🆓 Try DeepSeek V4 Free</span>
+          </h3>
+          <span class="playground-remaining" id="pg-remaining" data-i18n="pg_remaining">20 free messages / day</span>
+        </div>
+        <div class="pg-model-pick">
+          <button class="active" onclick="switchPgModel('deepseek-v4-flash', this)" id="pg-btn-flash">DeepSeek V4 Flash</button>
+          <button onclick="switchPgModel('deepseek-v4-pro', this)" id="pg-btn-pro">DeepSeek V4 Pro</button>
+        </div>
+        <div class="playground-msgs" id="pg-msgs">
+          <div class="pg-placeholder" data-i18n="pg_placeholder">Ask anything about coding, writing, or analysis...</div>
+        </div>
+        <div class="pg-input-row">
+          <input type="text" id="pg-input" data-i18n-placeholder="pg_input_ph" placeholder="Type your message here..." onkeydown="if(event.key==='Enter') sendPgMessage()">
+          <button onclick="sendPgMessage()" id="pg-send-btn">Send</button>
+        </div>
+        <p class="i18n-note" style="margin-top:8px;" data-i18n="pg_signup_hint">Want unlimited access? <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#a78bfa;">Sign up</a> and get your own API key.</p>
+      </div>
+    </div>
+
     <div class="card pricing-compare">
       <h3 style="display:flex;align-items:center;gap:8px;">
         <span data-i18n="pricing_compare_title">API Pricing Comparison</span>
@@ -175,6 +257,67 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </tbody>
       </table>
       <p class="i18n-note" style="margin-top:12px;" data-i18n="pricing_compare_note">No monthly fees. Pay only what you use. 1M context window — process entire codebases in one go.</p>
+    </div>
+
+    <!-- Competitor Comparison -->
+    <div class="card reseller-compare">
+      <h3 data-i18n="reseller_title">How We Compare vs Other Resellers</h3>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>OpenRouter</th>
+            <th>Together AI</th>
+            <th>Groq</th>
+            <th class="our-col" data-i18n="reseller_us">Us ★</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="reseller_full">Full V4 (not distilled)</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check our-col">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="reseller_rate">No rate limits</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check our-col">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="reseller_context">1M context (not truncated)</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check our-col">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="reseller_price">Input price / 1M tokens</td>
+            <td>$1.50+</td>
+            <td>$1.25+</td>
+            <td>$0.99+</td>
+            <td class="price-best our-col">$0.50</td>
+          </tr>
+          <tr>
+            <td data-i18n="reseller_direct">Direct official API</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check our-col">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="reseller_openai">OpenAI-compatible</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check our-col">✓</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="i18n-note" style="margin-top:10px;" data-i18n="reseller_note">Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed.</p>
     </div>
 
     <div class="tabs">
@@ -656,7 +799,29 @@ const I18N = {
     pricing_col_output: 'Output $/1M',
     pricing_best_value: 'Best Value',
     pricing_best_deal: 'Best Deal',
-    pricing_compare_note: 'No monthly fees. Pay only what you use. 1M context window — process entire codebases in one go.'
+    pricing_compare_note: 'No monthly fees. Pay only what you use. 1M context window — process entire codebases in one go.',
+    feature_full_title: 'Full V4 — Not Distilled',
+    feature_full_desc: 'Official DeepSeek V4 API. No quantization, no distillation, no compromises.',
+    feature_rate_title: 'No Rate Limits',
+    feature_rate_desc: 'Unlimited throughput. No RPM/TPM caps. Full speed, always.',
+    feature_context_title: '1M Context Window',
+    feature_context_desc: 'Process entire codebases or books in one shot. 5× more than GPT-4o.',
+    feature_compat_title: 'OpenAI Compatible',
+    feature_compat_desc: 'Drop-in replacement. Works with any OpenAI SDK, tool, or client.',
+    pg_title: '🆓 Try DeepSeek V4 Free',
+    pg_remaining: '20 free messages / day',
+    pg_placeholder: 'Ask anything about coding, writing, or analysis...',
+    pg_input_ph: 'Type your message here...',
+    pg_signup_hint: 'Want unlimited access? Sign up and get your own API key.',
+    reseller_title: 'How We Compare vs Other Resellers',
+    reseller_us: 'Us ★',
+    reseller_full: 'Full V4 (not distilled)',
+    reseller_rate: 'No rate limits',
+    reseller_context: '1M context (not truncated)',
+    reseller_price: 'Input price / 1M tokens',
+    reseller_direct: 'Direct official API',
+    reseller_openai: 'OpenAI-compatible',
+    reseller_note: "Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed."
   },
   zh: {
     hero_sub: '高性能 · 低价格 · OpenAI 兼容',
@@ -764,11 +929,100 @@ const I18N = {
     pricing_col_output: '输出 $/1M',
     pricing_best_value: '最优性价比',
     pricing_best_deal: '超值之选',
-    pricing_compare_note: '无月费，按量付费。100 万上下文窗口 — 一次性处理整个代码库。'
+    pricing_compare_note: '无月费，按量付费。100 万上下文窗口 — 一次性处理整个代码库。',
+    feature_full_title: '满血 V4 — 非蒸馏版',
+    feature_full_desc: '直接接入 DeepSeek 官方 V4 API。非蒸馏、非量化、无缩水。',
+    feature_rate_title: '不限速',
+    feature_rate_desc: '无 RPM/TPM 限制。全速访问，拒绝降频。',
+    feature_context_title: '100 万上下文窗口',
+    feature_context_desc: '一次处理整个代码库或整本书。5 倍于 GPT-4o。',
+    feature_compat_title: 'OpenAI 兼容',
+    feature_compat_desc: '开箱即用。兼容所有 OpenAI SDK、工具和客户端。',
+    pg_title: '🆓 免费体验 DeepSeek V4',
+    pg_remaining: '每天 20 条免费消息',
+    pg_placeholder: '随便问代码、写作、分析...',
+    pg_input_ph: '在这里输入消息...',
+    pg_signup_hint: '想无限使用？注册获取专属 API 密钥。',
+    reseller_title: '与同行的对比',
+    reseller_us: '我们 ★',
+    reseller_full: '满血 V4（非蒸馏）',
+    reseller_rate: '不限速',
+    reseller_context: '100万窗口（不截断）',
+    reseller_price: '输入价格 / 1M tokens',
+    reseller_direct: '直连官方 API',
+    reseller_openai: 'OpenAI 兼容',
+    reseller_note: '多数转售商通过第三方中转，加价且限速。我们直连 DeepSeek 官方 API — 真正满血，真正全速。'
   }
 };
 
 function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key; }
+
+// ===== Playground Chat =====
+var pgModel = 'deepseek-v4-flash';
+var pgLoading = false;
+
+function switchPgModel(model, btn) {
+  pgModel = model;
+  document.querySelectorAll('.pg-model-pick button').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function appendPgMsg(role, text) {
+  var msgs = document.getElementById('pg-msgs');
+  var ph = msgs.querySelector('.pg-placeholder');
+  if (ph) ph.remove();
+  var div = document.createElement('div');
+  div.className = 'pg-msg ' + role;
+  div.innerHTML = role === 'ai' ? formatPgText(text) : escapeHtml(text);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatPgText(text) {
+  text = escapeHtml(text);
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre>$2</pre>');
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+
+async function sendPgMessage() {
+  if (pgLoading) return;
+  var input = document.getElementById('pg-input');
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendPgMsg('user', msg);
+  pgLoading = true;
+  var btn = document.getElementById('pg-send-btn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    var r = await fetch(API_BASE + '/playground/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, model: pgModel })
+    });
+    var data = await r.json();
+    if (r.ok) {
+      appendPgMsg('ai', data.reply);
+      var rem = document.getElementById('pg-remaining');
+      rem.textContent = data.remaining + ' free messages left today';
+    } else {
+      appendPgMsg('ai', 'Error: ' + (data.detail || 'Something went wrong'));
+    }
+  } catch(e) {
+    appendPgMsg('ai', 'Network error. Please try again.');
+  }
+  pgLoading = false;
+  btn.disabled = false;
+  btn.textContent = 'Send';
+}
 
 function copyCode(btn) {
   var block = btn.closest('.code-block');

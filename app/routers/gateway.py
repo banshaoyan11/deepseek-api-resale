@@ -5,6 +5,7 @@ from sqlalchemy import select
 import json
 import time
 import logging
+from collections import defaultdict
 from datetime import datetime
 from app.database import get_db
 from app.models import User, APIKey
@@ -214,6 +215,60 @@ async def list_models():
             }
         ]
     }
+
+
+# ===== Playground: rate-limited demo for unauthenticated users =====
+
+_playground_quota = defaultdict(lambda: {"count": 0, "reset_at": 0})
+
+@router.post("/playground/chat")
+async def playground_chat(request: Request):
+    """Free trial chat — rate limited per IP (max 20/day). No auth required."""
+    import time as _time
+    now = _time.time()
+    ip = request.client.host if request.client else "unknown"
+    quota = _playground_quota[ip]
+
+    if now > quota["reset_at"]:
+        quota["count"] = 0
+        quota["reset_at"] = now + 86400
+
+    if quota["count"] >= 20:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Free trial limit reached (20/day). Please sign up for unlimited access."
+        )
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON")
+
+    msg = body.get("message", "")
+    if not msg or len(msg) > 4000:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Message required (max 4000 chars)")
+
+    model = body.get("model", "deepseek-v4-flash")
+    if model not in ("deepseek-v4-flash", "deepseek-v4-pro"):
+        model = "deepseek-v4-flash"
+
+    try:
+        response = await deepseek_service.chat_completions({
+            "model": model,
+            "messages": [{"role": "user", "content": msg}],
+            "max_tokens": 1024
+        })
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"DeepSeek API error: {str(e)}"
+        )
+
+    quota["count"] += 1
+    content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+    remaining = max(0, 20 - quota["count"])
+
+    return {"reply": content, "model": model, "remaining": remaining}
 
 @router.get("/v1/usage")
 async def get_usage(
