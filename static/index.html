@@ -88,6 +88,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .tutorial-toc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .tutorial-toc a { color: #a78bfa; text-decoration: none; padding: 4px 12px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 6px; font-size: 0.82em; cursor: pointer; }
 .tutorial-toc a:hover { border-color: #6366f1; }
+.pricing-compare { overflow-x: auto; }
+.pricing-compare table { width: 100%; border-collapse: collapse; font-size: 0.82em; min-width: 500px; }
+.pricing-compare th { padding: 10px 12px; text-align: center; border-bottom: 1px solid #2a2a4a; color: #888; font-size: 0.78em; font-weight: normal; white-space: nowrap; }
+.pricing-compare th:first-child { text-align: left; }
+.pricing-compare td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #1a1a2e; font-size: 0.85em; color: #c0c0c0; }
+.pricing-compare td:first-child { text-align: left; font-weight: 500; color: #e0e0e0; }
+.pricing-compare .our-row td { background: rgba(99, 102, 241, 0.08); color: #e0e0e0; font-weight: 500; }
+.pricing-compare .our-row td:first-child { color: #a78bfa; }
+.pricing-compare .price-best { color: #10b981; font-weight: 700; }
+.pricing-compare .price-high { color: #f87171; }
+.pricing-compare .savings-badge { display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 700; margin-left: 6px; }
+.pricing-compare .hero-tag { display: inline-block; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.68em; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -103,6 +115,68 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
   <!-- ===== AUTH VIEW ===== -->
   <div id="auth-view">
+    <div class="card pricing-compare">
+      <h3 style="display:flex;align-items:center;gap:8px;">
+        <span data-i18n="pricing_compare_title">API Pricing Comparison</span>
+        <span class="hero-tag" data-i18n="pricing_compare_badge">Up to 95% Cheaper</span>
+      </h3>
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="pricing_col_provider">Provider / Model</th>
+            <th data-i18n="pricing_col_context">Context</th>
+            <th data-i18n="pricing_col_input">Input $/1M</th>
+            <th data-i18n="pricing_col_output">Output $/1M</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OpenAI o1</td>
+            <td>200K</td>
+            <td class="price-high">$15.00</td>
+            <td class="price-high">$60.00</td>
+          </tr>
+          <tr>
+            <td>OpenAI GPT-4o</td>
+            <td>128K</td>
+            <td class="price-high">$2.50</td>
+            <td class="price-high">$10.00</td>
+          </tr>
+          <tr>
+            <td>Anthropic Claude 3.5 Sonnet</td>
+            <td>200K</td>
+            <td class="price-high">$3.00</td>
+            <td class="price-high">$15.00</td>
+          </tr>
+          <tr>
+            <td>Anthropic Claude 3 Opus</td>
+            <td>200K</td>
+            <td class="price-high">$15.00</td>
+            <td class="price-high">$75.00</td>
+          </tr>
+          <tr class="our-row">
+            <td>
+              <span style="color:#a78bfa;">★</span> DeepSeek V4 Pro
+              <span class="hero-tag" data-i18n="pricing_best_value">Best Value</span>
+            </td>
+            <td style="color:#10b981;">1M</td>
+            <td class="price-best">$0.50</td>
+            <td class="price-best">$1.50 <span class="savings-badge">-83%</span></td>
+          </tr>
+          <tr class="our-row">
+            <td>
+              <span style="color:#a78bfa;">★</span> DeepSeek V4 Flash
+              <span class="hero-tag" data-i18n="pricing_best_deal">Best Deal</span>
+            </td>
+            <td style="color:#10b981;">1M</td>
+            <td class="price-best">$0.50</td>
+            <td class="price-best">$1.50 <span class="savings-badge">-83%</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="i18n-note" style="margin-top:12px;" data-i18n="pricing_compare_note">No monthly fees. Pay only what you use. 1M context window — process entire codebases in one go.</p>
+    </div>
+
     <div class="tabs">
       <button class="tab active" onclick="switchAuthTab('login')" id="tab-login" data-i18n="sign_in">Sign In</button>
       <button class="tab" onclick="switchAuthTab('register')" id="tab-register" data-i18n="sign_up">Sign Up</button>
@@ -573,7 +647,16 @@ const I18N = {
     tut_start_tui: 'Terminal 2 — Launch the chat interface:',
     tut_start_chat: "That's it! Type your message and press Enter. The AI will respond using your DeepSeek V4 model.",
     tut_api_title: 'Use API in Your Code',
-    tut_api_desc: 'You can also call DeepSeek directly from any OpenAI-compatible SDK. Just point it to our endpoint:'
+    tut_api_desc: 'You can also call DeepSeek directly from any OpenAI-compatible SDK. Just point it to our endpoint:',
+    pricing_compare_title: 'API Pricing Comparison',
+    pricing_compare_badge: 'Up to 95% Cheaper',
+    pricing_col_provider: 'Provider / Model',
+    pricing_col_context: 'Context',
+    pricing_col_input: 'Input $/1M',
+    pricing_col_output: 'Output $/1M',
+    pricing_best_value: 'Best Value',
+    pricing_best_deal: 'Best Deal',
+    pricing_compare_note: 'No monthly fees. Pay only what you use. 1M context window — process entire codebases in one go.'
   },
   zh: {
     hero_sub: '高性能 · 低价格 · OpenAI 兼容',
@@ -672,7 +755,16 @@ const I18N = {
     tut_start_tui: '终端 2 — 启动聊天界面：',
     tut_start_chat: '搞定！输入消息按回车，AI 就会用你的 DeepSeek V4 模型回复。',
     tut_api_title: '在代码中使用 API',
-    tut_api_desc: '你也可以在任何兼容 OpenAI 格式的 SDK 中直接调用 DeepSeek：'
+    tut_api_desc: '你也可以在任何兼容 OpenAI 格式的 SDK 中直接调用 DeepSeek：',
+    pricing_compare_title: 'API 价格对比',
+    pricing_compare_badge: '最高节省 95%',
+    pricing_col_provider: '供应商 / 模型',
+    pricing_col_context: '上下文窗口',
+    pricing_col_input: '输入 $/1M',
+    pricing_col_output: '输出 $/1M',
+    pricing_best_value: '最优性价比',
+    pricing_best_deal: '超值之选',
+    pricing_compare_note: '无月费，按量付费。100 万上下文窗口 — 一次性处理整个代码库。'
   }
 };
 
