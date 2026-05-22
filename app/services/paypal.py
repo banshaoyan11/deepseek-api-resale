@@ -9,6 +9,7 @@ class PayPalService:
         self.client_id = settings.PAYPAL_CLIENT_ID
         self.client_secret = settings.PAYPAL_CLIENT_SECRET
         self.base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_SANDBOX else "https://api-m.paypal.com"
+        self.site_url = settings.BASE_URL.rstrip('/')
         self.access_token = None
 
     async def get_access_token(self) -> str:
@@ -51,6 +52,8 @@ class PayPalService:
                 "custom_id": str(user_id) if user_id else None
             }],
             "application_context": {
+                "return_url": f"{self.site_url}/payment/success",
+                "cancel_url": f"{self.site_url}/payment/cancel",
                 "brand_name": "DeepSeek API Resale",
                 "landing_page": "LOGIN",
                 "shipping_preference": "NO_SHIPPING",

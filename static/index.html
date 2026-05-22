@@ -173,10 +173,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </div>
         <button class="btn btn-primary btn-block" onclick="doTopUp()" id="topup-btn" data-i18n="pay_with_paypal">Pay with PayPal</button>
         <div id="topup-error"></div>
-        <div id="pending-payment" class="hidden" style="margin-top:16px;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;">
-          <p style="color:#888;margin-bottom:8px;" data-i18n="payment_pending">Payment pending. After completing payment in PayPal, click below:</p>
-          <button class="btn btn-primary btn-block" onclick="confirmPayment()" id="confirm-btn" data-i18n="confirm_payment">I've Completed Payment</button>
-          <button class="btn btn-block" onclick="cancelPendingPayment()" style="margin-top:8px;background:#2a2a4a;color:#888;">Cancel Pending Order</button>
+        <div id="payment-status" class="hidden" style="margin-top:16px;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;text-align:center;">
+          <div class="loading"><div class="spinner"></div><span id="payment-status-text">Waiting for payment...</span></div>
         </div>
       </div>
     </div>
@@ -561,6 +559,8 @@ function selectTopUp(amt) {
   document.querySelector('.topup-amt[data-amt="' + amt + '"]').classList.add('selected');
 }
 
+let paymentCheckInterval = null;
+
 async function doTopUp() {
   clearError('topup-error');
   var btn = document.getElementById('topup-btn');
@@ -569,9 +569,17 @@ async function doTopUp() {
   try {
     var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
     pendingOrderId = data.order_id;
+    
+    // 显示等待状态
+    document.getElementById('payment-status-text').textContent = 'Waiting for payment completion...';
+    setDisplay('payment-status', true);
+    
+    // 打开 PayPal 支付页面
     window.open(data.checkout_url, '_blank');
     toast('Order #' + data.order_id + ' ' + t('order_created'));
-    setDisplay('pending-payment', true);
+    
+    // 开始轮询检查支付状态
+    startPaymentCheck();
   } catch(e) {
     showError('topup-error', e.message);
   } finally {
@@ -580,37 +588,47 @@ async function doTopUp() {
   }
 }
 
-function cancelPendingPayment() {
-  pendingOrderId = null;
-  setDisplay('pending-payment', false);
-  toast('Pending order cancelled');
+function startPaymentCheck() {
+  if (!pendingOrderId) return;
+  
+  // 每 2 秒检查一次支付状态
+  paymentCheckInterval = setInterval(async function() {
+    try {
+      var status = await api('GET', '/billing/paypal/check/' + pendingOrderId);
+      
+      if (status.status === 'completed') {
+        // 支付完成，停止轮询
+        clearInterval(paymentCheckInterval);
+        document.getElementById('payment-status-text').textContent = 'Payment completed! Processing...';
+        
+        // 调用 capture 接口完成充值
+        await capturePayment();
+      }
+    } catch(e) {
+      // 忽略错误，继续轮询
+    }
+  }, 2000);
 }
 
-async function confirmPayment() {
-  if (!pendingOrderId) return;
-  var btn = document.getElementById('confirm-btn');
-  btn.textContent = t('loading');
-  btn.disabled = true;
+async function capturePayment() {
   try {
-    // 先验证订单状态
-    var status = await api('GET', '/billing/paypal/check/' + pendingOrderId);
-    if (status.status !== 'completed') {
-      throw new Error('Payment not completed yet. Please complete payment in PayPal first.');
-    }
-    
-    // 确认支付
     var result = await api('POST', '/billing/paypal/capture/' + pendingOrderId);
     toast(t('payment_success'));
     pendingOrderId = null;
-    setDisplay('pending-payment', false);
+    setDisplay('payment-status', false);
     await loadOverview();
   } catch(e) {
     showError('topup-error', e.message);
-  } finally {
-    btn.textContent = t('confirm_payment');
-    btn.disabled = false;
+    setDisplay('payment-status', false);
   }
 }
+
+// 页面关闭时清除轮询
+window.addEventListener('beforeunload', function() {
+  if (paymentCheckInterval) {
+    clearInterval(paymentCheckInterval);
+  }
+});
 
 // Stats
 async function loadUsageStats() {

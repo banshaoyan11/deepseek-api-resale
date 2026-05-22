@@ -102,6 +102,17 @@ async def check_paypal_order(
             detail=f"Failed to check order: {str(e)}"
         )
 
+@router.get("/paypal/success")
+async def paypal_success():
+    """PayPal payment success redirect page"""
+    # This endpoint is called by PayPal redirect, frontend will handle the rest
+    return {"message": "Payment successful, processing..."}
+
+@router.get("/paypal/cancel")
+async def paypal_cancel():
+    """PayPal payment cancel redirect page"""
+    return {"message": "Payment cancelled"}
+
 @router.post("/paypal/capture/{order_id}")
 async def capture_paypal_order(
     order_id: str,
