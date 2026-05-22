@@ -1,5 +1,6 @@
 # app/routers/billing.py
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
@@ -103,15 +104,68 @@ async def check_paypal_order(
         )
 
 @router.get("/paypal/success")
-async def paypal_success():
+async def paypal_success(request: Request):
     """PayPal payment success redirect page"""
-    # This endpoint is called by PayPal redirect, frontend will handle the rest
-    return {"message": "Payment successful, processing..."}
+    # Get token from query parameter
+    token = request.query_params.get("token")
+    
+    # Return HTML page that redirects to frontend topup page
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Payment Successful</title>
+        <script>
+            // Send message to opener window if it exists
+            if (window.opener) {{
+                window.opener.postMessage({{ type: 'paypal_payment_success', token: '{token}' }}, '*');
+            }}
+            // Redirect to topup page
+            setTimeout(function() {{
+                window.location.href = '/#topup';
+            }}, 1000);
+        </script>
+        <style>
+            body {{ font-family: Arial, sans-serif; text-align: center; padding-top: 100px; background: #1a1a2e; color: #fff; }}
+            .spinner {{ width: 50px; height: 50px; border: 5px solid #3498db; border-top-color: #2ecc71; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
+            @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+        </style>
+    </head>
+    <body>
+        <div class="spinner"></div>
+        <h1>Payment Successful!</h1>
+        <p>Redirecting to your account...</p>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @router.get("/paypal/cancel")
 async def paypal_cancel():
     """PayPal payment cancel redirect page"""
-    return {"message": "Payment cancelled"}
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Payment Cancelled</title>
+        <script>
+            setTimeout(function() {
+                window.location.href = '/#topup';
+            }, 2000);
+        </script>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding-top: 100px; background: #1a1a2e; color: #fff; }
+        </style>
+    </head>
+    <body>
+        <h1>Payment Cancelled</h1>
+        <p>Redirecting to payment page...</p>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @router.post("/paypal/capture/{order_id}")
 async def capture_paypal_order(

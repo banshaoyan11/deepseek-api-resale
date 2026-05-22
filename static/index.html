@@ -643,6 +643,16 @@ async function loadUsageStats() {
   } catch(e) { document.getElementById('stats-container').innerHTML = '<div class="alert alert-error">' + t('fail_load_stats') + '</div>'; }
 }
 
+// Listen for payment success message from PayPal popup
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'paypal_payment_success') {
+    // Payment successful, capture and reload
+    if (pendingOrderId) {
+      capturePayment();
+    }
+  }
+});
+
 // Init
 (function(){
   setLang(currentLang);
