@@ -11,6 +11,7 @@ class DeepSeekService:
 
     async def chat_completions(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Proxy chat completions request to DeepSeek API"""
+        request_data = {**request_data, "stream": False}
         async with httpx.AsyncClient(timeout=120.0) as client:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -30,6 +31,7 @@ class DeepSeekService:
 
     async def anthropic_messages(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Proxy Anthropic-format messages request to DeepSeek API"""
+        request_data = {**request_data, "stream": False}
         async with httpx.AsyncClient(timeout=120.0) as client:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
