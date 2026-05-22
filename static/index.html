@@ -48,6 +48,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .topup-amt .badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; margin-top: 4px; font-size: 0.65em; padding: 2px 8px; }
 .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 0.9em; }
 .alert-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+.alert-warning { background: #713f12; color: #fbbf24; border: 1px solid #92400e; }
 .alert-success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
 .hidden { display: none !important; }
 .loading { text-align: center; padding: 40px; color: #888; }
@@ -128,6 +129,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
     <!-- Overview -->
     <div id="dash-overview">
+      <div id="balance-warning" class="alert alert-warning hidden" style="margin-bottom:16px;">
+        <span id="balance-warning-msg"></span>
+      </div>
       <div class="card">
         <div class="balance-label" data-i18n="current_balance">Current Balance (USD)</div>
         <div class="balance" id="user-balance">$0.00</div>
@@ -538,6 +542,24 @@ async function loadOverview() {
   try {
     var bal = await api('GET', '/billing/balance');
     document.getElementById('user-balance').textContent = '$' + bal.balance.toFixed(2);
+    document.getElementById('user-balance').style.color = bal.balance < 0.01 ? '#ef4444' : bal.balance < 1 ? '#f59e0b' : '#10b981';
+    
+    var warnDiv = document.getElementById('balance-warning');
+    if (bal.balance < 0.01) {
+      warnDiv.classList.remove('hidden');
+      warnDiv.className = 'alert alert-error';
+      document.getElementById('balance-warning-msg').textContent = currentLang === 'zh' 
+        ? '余额已用完！您的 API 密钥已停止工作，请尽快充值以恢复服务。'
+        : 'Balance exhausted! Your API keys have stopped working. Please top up to restore service.';
+    } else if (bal.balance < 1) {
+      warnDiv.classList.remove('hidden');
+      warnDiv.className = 'alert alert-warning';
+      document.getElementById('balance-warning-msg').textContent = currentLang === 'zh'
+        ? '余额不足 $1，API 服务即将中断，请及时充值。'
+        : 'Balance below $1. API service may be interrupted soon. Please top up.';
+    } else {
+      warnDiv.classList.add('hidden');
+    }
     
     // Calculate token estimates
     var inputTokenRate = 0.50; // $0.50 per 1M input tokens
