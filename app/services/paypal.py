@@ -52,8 +52,8 @@ class PayPalService:
                 "custom_id": str(user_id) if user_id else None
             }],
             "application_context": {
-                "return_url": f"{self.site_url}/payment/success",
-                "cancel_url": f"{self.site_url}/payment/cancel",
+                "return_url": f"{self.site_url}/billing/paypal/success",
+                "cancel_url": f"{self.site_url}/billing/paypal/cancel",
                 "brand_name": "DeepSeek API Resale",
                 "landing_page": "LOGIN",
                 "shipping_preference": "NO_SHIPPING",
