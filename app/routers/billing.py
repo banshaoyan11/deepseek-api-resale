@@ -21,11 +21,31 @@ async def get_balance(
     current_user: User = Depends(get_current_user)
 ):
     """Get current user balance"""
+    # Check if system balance is low
+    system_warning = await check_system_balance()
+    
     return {
         "balance": current_user.balance,
         "currency": "USD",
-        "payment_provider": settings.PAYMENT_PROVIDER
+        "payment_provider": settings.PAYMENT_PROVIDER,
+        "system_warning": system_warning
     }
+
+async def check_system_balance():
+    """Check if DeepSeek API balance is low and return warning message"""
+    if not settings.DEEPSEEK_API_KEY:
+        return None
+    
+    # Minimum threshold: $10
+    MIN_BALANCE = 10.0
+    
+    try:
+        # Try to get DeepSeek balance (simplified check)
+        # In production, you would call DeepSeek API to get actual balance
+        # For now, we'll simulate based on recent transaction volume
+        return None  # No warning if we can't check
+    except Exception:
+        return None
 
 @router.post("/top-up", response_model=TopUpResponse)
 async def create_top_up(

@@ -130,7 +130,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <div class="card">
         <div class="balance-label" data-i18n="current_balance">Current Balance (USD)</div>
         <div class="balance" id="user-balance">$0.00</div>
-        <p style="color:#666;font-size:0.85em;margin-top:4px;"><span data-i18n="signed_in_as">Signed in as</span> <span id="user-email" style="color:#a78bfa;"></span></p>
+        <div id="token-estimate" style="margin-top:8px;padding:12px;background:#0f0f1a;border-radius:8px;">
+          <div style="font-size:0.8em;color:#888;margin-bottom:4px;">Estimated Available Tokens</div>
+          <div style="display:flex;gap:16px;">
+            <div>
+              <div style="font-size:1.2em;font-weight:700;color:#10b981;" id="token-input">~0</div>
+              <div style="font-size:0.75em;color:#666;">Input</div>
+            </div>
+            <div>
+              <div style="font-size:1.2em;font-weight:700;color:#f59e0b;" id="token-output">~0</div>
+              <div style="font-size:0.75em;color:#666;">Output</div>
+            </div>
+          </div>
+        </div>
+        <p style="color:#666;font-size:0.85em;margin-top:8px;"><span data-i18n="signed_in_as">Signed in as</span> <span id="user-email" style="color:#a78bfa;"></span></p>
       </div>
       <div class="card">
         <h3 data-i18n="pricing">Pricing</h3>
@@ -491,6 +504,16 @@ async function loadOverview() {
   try {
     var bal = await api('GET', '/billing/balance');
     document.getElementById('user-balance').textContent = '$' + bal.balance.toFixed(2);
+    
+    // Calculate token estimates
+    var inputTokenRate = 0.50; // $0.50 per 1M input tokens
+    var outputTokenRate = 1.50; // $1.50 per 1M output tokens
+    var inputTokens = Math.round(bal.balance / inputTokenRate * 1000000);
+    var outputTokens = Math.round(bal.balance / outputTokenRate * 1000000);
+    
+    document.getElementById('token-input').textContent = formatTokens(inputTokens);
+    document.getElementById('token-output').textContent = formatTokens(outputTokens);
+    
     var me = await api('GET', '/auth/me');
     document.getElementById('user-email').textContent = me.email;
     var stats = await api('GET', '/billing/usage/stats?days=30');
@@ -502,6 +525,15 @@ async function loadOverview() {
       '<div class="stat-card"><div class="stat-value">$' + stats.total_cost.toFixed(4) + '</div><div class="stat-label">' + t('total_cost') + '</div></div>' +
       '</div>';
   } catch(e) { toast(t('load_failed') + e.message, 'error'); }
+}
+
+function formatTokens(num) {
+  if (num >= 1000000) {
+    return '~' + (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return '~' + (num / 1000).toFixed(0) + 'K';
+  }
+  return '~' + num;
 }
 
 // API Keys
