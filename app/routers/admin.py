@@ -92,6 +92,27 @@ async def refresh_deepseek_balance(
             "message": "Failed to fetch balance from DeepSeek API"
         }
 
+@router.post("/set-balance")
+async def set_deepseek_balance(
+    balance: float,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_admin_user)
+):
+    """Manually set DeepSeek API balance"""
+    if balance < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Balance cannot be negative"
+        )
+    
+    await save_deepseek_balance(db, balance)
+    
+    return {
+        "success": True,
+        "balance": balance,
+        "message": f"Balance manually set to ${balance:.2f}"
+    }
+
 @router.get("/users")
 async def get_all_users(
     db: AsyncSession = Depends(get_db),
