@@ -91,28 +91,67 @@ async def get_all_transactions(
     return [{
         "id": t.id,
         "user_id": t.user_id,
-        "type": t.transaction_type.value,
+        "type": t.transaction_type.value if hasattr(t.transaction_type, 'value') else t.transaction_type,
         "amount": t.amount,
         "description": t.description,
         "created_at": t.created_at.isoformat()
     } for t in transactions]
 
 async def check_deepseek_balance():
-    """Check DeepSeek API balance"""
+    """Check DeepSeek API balance using their API"""
     if not settings.DEEPSEEK_API_KEY:
         return None
     
     try:
-        async with httpx.AsyncClient() as client:
-            # This is a placeholder - actual balance endpoint may vary
-            response = await client.get(
-                f"{settings.DEEPSEEK_BASE_URL}/api/balance",
-                headers={"Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}"}
+        async with httpx.AsyncClient(timeout=10) as client:
+            # Try DeepSeek API balance endpoint
+            response = await client.post(
+                f"{settings.DEEPSEEK_BASE_URL}/v1/models",
+                headers={
+                    "Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={}
             )
-            if response.status_code == 200:
-                data = response.json()
-                return data.get("balance")
-            return None
+            
+            if response.status_code == 402:
+                # Payment required - balance is zero or insufficient
+                return 0.0
+            elif response.status_code == 200:
+                # Extract balance from response headers if available
+                balance_str = response.headers.get('x-remaining-balance')
+                if balance_str:
+                    return float(balance_str)
+                
+                # Try alternative approach - get usage info
+                try:
+                    usage_response = await client.post(
+                        f"{settings.DEEPSEEK_BASE_URL}/v1/dashboard/usage",
+                        headers={
+                            "Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}",
+                            "Content-Type": "application/json"
+                        },
+                        json={"start_time": "2024-01-01", "end_time": "2030-01-01"}
+                    )
+                    if usage_response.status_code == 200:
+                        data = usage_response.json()
+                        # Try different possible fields
+                        if 'balance' in data:
+                            return float(data['balance'])
+                        elif 'remaining_balance' in data:
+                            return float(data['remaining_balance'])
+                        elif 'total_available' in data:
+                            return float(data['total_available'])
+                except:
+                    pass
+                
+                # If we can't get exact balance, return None (will show N/A)
+                return None
+            elif response.status_code == 401:
+                # Unauthorized - invalid API key
+                return None
+            else:
+                return None
     except Exception as e:
         print(f"Error checking DeepSeek balance: {e}")
         return None
