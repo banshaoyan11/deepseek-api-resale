@@ -7,12 +7,18 @@ _db_url = settings.DATABASE_URL
 _db_url = _db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 _db_url = _db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
+_is_sqlite = "sqlite" in _db_url
+
+_connect_args = {}
+if not _is_sqlite:
+    _connect_args["server_settings"] = {"application_name": "deepseek-resale"}
+
 engine = create_async_engine(
     _db_url,
     echo=True,
-    pool_pre_ping=True,
-    pool_recycle=300,
-    connect_args={"server_settings": {"application_name": "deepseek-resale"}},
+    pool_pre_ping=not _is_sqlite,
+    pool_recycle=300 if not _is_sqlite else -1,
+    connect_args=_connect_args if not _is_sqlite else {},
 )
 
 AsyncSessionLocal = async_sessionmaker(

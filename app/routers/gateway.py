@@ -7,10 +7,22 @@ import time
 from datetime import datetime
 from app.database import get_db
 from app.models import User, APIKey
-from app.auth import verify_api_key
+from app.auth import verify_api_key, verify_api_key_anthropic
 from app.services import deepseek_service, billing_service
 
 router = APIRouter(tags=["API Gateway"])
+
+
+def _extract_api_key_str(auth_header: str) -> str:
+    return auth_header.replace("Bearer ", "").strip()
+
+
+async def _get_api_key_record(api_key_str: str, db: AsyncSession):
+    result = await db.execute(
+        select(APIKey).where(APIKey.key == api_key_str)
+    )
+    return result.scalar_one_or_none()
+
 
 @router.api_route("/v1/chat/completions", methods=["POST", "OPTIONS"])
 async def chat_completions(
@@ -23,11 +35,9 @@ async def chat_completions(
     """
     start_time = time.time()
 
-    # 1. Verify API key
     auth_header = request.headers.get("authorization")
     user = await verify_api_key(auth_header, db)
 
-    # 2. Get request body
     try:
         request_data = await request.json()
     except Exception:
@@ -36,7 +46,6 @@ async def chat_completions(
             detail="Invalid JSON body"
         )
 
-    # 3. Validate request
     if "messages" not in request_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,7 +54,6 @@ async def chat_completions(
 
     model = request_data.get("model", "deepseek-v4-flash")
 
-    # 4. Estimate cost before request
     total_text = ""
     for msg in request_data["messages"]:
         if isinstance(msg, dict):
@@ -57,7 +65,6 @@ async def chat_completions(
         request_data.get("max_tokens", 1000)
     )
 
-    # 5. Check balance
     has_balance = await billing_service.check_balance(user.id, estimated_cost, db)
     if not has_balance:
         raise HTTPException(
@@ -65,7 +72,6 @@ async def chat_completions(
             detail=f"Insufficient balance. Required: ${estimated_cost:.4f}, Available: ${user.balance:.4f}"
         )
 
-    # 6. Call DeepSeek API
     try:
         response = await deepseek_service.chat_completions(request_data)
     except Exception as e:
@@ -74,25 +80,17 @@ async def chat_completions(
             detail=f"DeepSeek API error: {str(e)}"
         )
 
-    # 7. Calculate actual cost from response
     usage = response.get("usage", {})
     input_tokens = usage.get("prompt_tokens", 0)
     output_tokens = usage.get("completion_tokens", 0)
     actual_cost = deepseek_service.calculate_cost(input_tokens, output_tokens)
 
-    # 8. Deduct balance
     await billing_service.deduct_balance(user.id, actual_cost, db)
 
-    # 9. Record usage
     response_time_ms = int((time.time() - start_time) * 1000)
 
-    # Get API key ID
-    result = await db.execute(
-        select(APIKey).where(
-            APIKey.key == auth_header.replace("Bearer ", "")
-        )
-    )
-    api_key = result.scalar_one_or_none()
+    api_key_str = _extract_api_key_str(auth_header)
+    api_key = await _get_api_key_record(api_key_str, db)
 
     await billing_service.record_usage(
         user_id=user.id,
@@ -107,6 +105,83 @@ async def chat_completions(
     )
 
     return response
+
+
+@router.api_route("/anthropic/v1/messages", methods=["POST", "OPTIONS"])
+async def anthropic_messages(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Anthropic-compatible messages endpoint.
+    Proxies requests to DeepSeek Anthropic API with billing.
+    Use x-api-key or Authorization: Bearer header for authentication.
+    """
+    start_time = time.time()
+
+    user = await verify_api_key_anthropic(request, db)
+
+    try:
+        request_data = await request.json()
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON body"
+        )
+
+    model = request_data.get("model", "deepseek-v4-flash")
+    max_tokens = request_data.get("max_tokens", 1000)
+
+    estimated_input_tokens = deepseek_service.estimate_anthropic_tokens(request_data)
+    estimated_cost = deepseek_service.calculate_cost(
+        estimated_input_tokens,
+        max_tokens
+    )
+
+    has_balance = await billing_service.check_balance(user.id, estimated_cost, db)
+    if not has_balance:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=f"Insufficient balance. Required: ${estimated_cost:.4f}, Available: ${user.balance:.4f}"
+        )
+
+    try:
+        response = await deepseek_service.anthropic_messages(request_data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"DeepSeek API error: {str(e)}"
+        )
+
+    usage = response.get("usage", {})
+    input_tokens = usage.get("input_tokens", 0)
+    output_tokens = usage.get("output_tokens", 0)
+    actual_cost = deepseek_service.calculate_cost(input_tokens, output_tokens)
+
+    await billing_service.deduct_balance(user.id, actual_cost, db)
+
+    response_time_ms = int((time.time() - start_time) * 1000)
+
+    api_key_str = request.headers.get("x-api-key", "").strip()
+    if not api_key_str:
+        auth_header = request.headers.get("authorization", "")
+        api_key_str = _extract_api_key_str(auth_header)
+    api_key = await _get_api_key_record(api_key_str, db)
+
+    await billing_service.record_usage(
+        user_id=user.id,
+        api_key_id=api_key.id if api_key else 0,
+        model=model,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cost=actual_cost,
+        request_data=json.dumps(request_data),
+        response_time_ms=response_time_ms,
+        db=db
+    )
+
+    return response
+
 
 @router.get("/v1/models")
 async def list_models():

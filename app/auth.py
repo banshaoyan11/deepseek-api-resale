@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, ExpiredSignatureError, jwt
 import bcrypt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -94,8 +94,30 @@ async def verify_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    api_key_str = authorization.replace("Bearer ", "")
+    api_key_str = authorization.replace("Bearer ", "").strip()
+    return await _lookup_api_key(api_key_str, db)
 
+
+async def verify_api_key_anthropic(
+    request: "Request",
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    api_key_str = request.headers.get("x-api-key", "").strip()
+    if not api_key_str:
+        auth_header = request.headers.get("authorization", "")
+        if auth_header.startswith("Bearer "):
+            api_key_str = auth_header.replace("Bearer ", "").strip()
+
+    if not api_key_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing API key (use x-api-key or Authorization header)",
+        )
+
+    return await _lookup_api_key(api_key_str, db)
+
+
+async def _lookup_api_key(api_key_str: str, db: AsyncSession) -> User:
     result = await db.execute(
         select(APIKey).where(APIKey.key == api_key_str, APIKey.is_active == True)
     )
