@@ -211,7 +211,7 @@ const API_BASE = window.location.origin;
 let authToken = localStorage.getItem('ds_token') || '';
 let selectedAmount = 10;
 let currentLang = localStorage.getItem('ds_lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
-let pendingOrderId = null;
+let pendingOrderId = null;  // 只在当前会话中临时保存，刷新页面后重置
 
 const I18N = {
   en: {
@@ -478,29 +478,12 @@ function switchDashTab(tab) {
   if (tab === 'apikeys') loadApiKeys();
   if (tab === 'stats') loadUsageStats();
   if (tab === 'overview') loadOverview();
-  
-  // Check for pending PayPal order when switching to topup
-  if (tab === 'topup') {
-    var savedOrderId = localStorage.getItem('pending_paypal_order_id');
-    if (savedOrderId) {
-      pendingOrderId = savedOrderId;
-      setDisplay('pending-payment', true);
-    }
-  }
 }
 
 async function showDashboard() {
   setDisplay('auth-view', false);
   setDisplay('dashboard-view', true);
   await loadOverview();
-  
-  // Check for pending PayPal order in localStorage
-  var savedOrderId = localStorage.getItem('pending_paypal_order_id');
-  if (savedOrderId) {
-    pendingOrderId = savedOrderId;
-    setDisplay('pending-payment', true);
-  }
-  
   switchDashTab('overview');
 }
 
@@ -586,7 +569,6 @@ async function doTopUp() {
   try {
     var data = await api('POST', '/billing/top-up', { amount: selectedAmount });
     pendingOrderId = data.order_id;
-    localStorage.setItem('pending_paypal_order_id', data.order_id);
     window.open(data.checkout_url, '_blank');
     toast('Order #' + data.order_id + ' ' + t('order_created'));
     setDisplay('pending-payment', true);
@@ -600,7 +582,6 @@ async function doTopUp() {
 
 function cancelPendingPayment() {
   pendingOrderId = null;
-  localStorage.removeItem('pending_paypal_order_id');
   setDisplay('pending-payment', false);
   toast('Pending order cancelled');
 }
@@ -611,10 +592,16 @@ async function confirmPayment() {
   btn.textContent = t('loading');
   btn.disabled = true;
   try {
-    await api('POST', '/billing/paypal/capture/' + pendingOrderId);
+    // 先验证订单状态
+    var status = await api('GET', '/billing/paypal/check/' + pendingOrderId);
+    if (status.status !== 'completed') {
+      throw new Error('Payment not completed yet. Please complete payment in PayPal first.');
+    }
+    
+    // 确认支付
+    var result = await api('POST', '/billing/paypal/capture/' + pendingOrderId);
     toast(t('payment_success'));
     pendingOrderId = null;
-    localStorage.removeItem('pending_paypal_order_id');
     setDisplay('pending-payment', false);
     await loadOverview();
   } catch(e) {

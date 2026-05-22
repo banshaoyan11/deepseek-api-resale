@@ -85,6 +85,23 @@ async def create_top_up(
                 detail=f"Stripe payment creation failed: {str(e)}"
             )
 
+@router.get("/paypal/check/{order_id}")
+async def check_paypal_order(
+    order_id: str
+):
+    """Check PayPal order status"""
+    try:
+        order = await paypal_service.get_order(order_id)
+        return {
+            "status": order.get("status", "unknown").lower(),
+            "order_id": order_id
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check order: {str(e)}"
+        )
+
 @router.post("/paypal/capture/{order_id}")
 async def capture_paypal_order(
     order_id: str,
