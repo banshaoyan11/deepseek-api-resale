@@ -589,6 +589,9 @@ async function loadSystemStatus() {
     }
     
     var metrics = status.metrics;
+    var lastUpdated = metrics.deepseek_balance_updated ? 
+      new Date(metrics.deepseek_balance_updated).toLocaleString() : 'Never';
+    
     document.getElementById('system-status-content').innerHTML = 
       warningsHtml +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">' +
@@ -610,15 +613,33 @@ async function loadSystemStatus() {
       '</div>' +
       '</div>' +
       '<div style="margin-top:12px;padding:12px;background:#0f0f1a;border-radius:8px;">' +
-        '<div style="font-size:0.85em;color:#888;margin-bottom:4px;">DeepSeek API Balance</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+          '<div style="font-size:0.85em;color:#888;">DeepSeek API Balance</div>' +
+          '<button onclick="refreshDeepseekBalance()" class="btn btn-sm" style="padding:4px 12px;font-size:0.75em;">🔄 Refresh</button>' +
+        '</div>' +
         '<div style="font-size:1.2em;font-weight:700;color:' + 
           (metrics.deepseek_balance && metrics.deepseek_balance < 10 ? '#ef4444' : '#10b981') + ';">' +
-          (metrics.deepseek_balance ? '$' + metrics.deepseek_balance.toFixed(2) : 'N/A') +
+          (metrics.deepseek_balance !== null && metrics.deepseek_balance !== undefined ? '$' + metrics.deepseek_balance.toFixed(2) : 'N/A') +
         '</div>' +
+        '<div style="font-size:0.7em;color:#666;margin-top:4px;">Last updated: ' + lastUpdated + '</div>' +
       '</div>';
   } catch(e) {
     document.getElementById('system-status-content').innerHTML = 
       '<div class="alert alert-error">Failed to load system status: ' + e.message + '</div>';
+  }
+}
+
+async function refreshDeepseekBalance() {
+  try {
+    var result = await api('POST', '/admin/refresh-balance');
+    if (result.success) {
+      toast('Balance refreshed: $' + result.balance.toFixed(2), 'success');
+      await loadSystemStatus();
+    } else {
+      toast('Failed to refresh balance: ' + result.message, 'error');
+    }
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
   }
 }
 

@@ -75,3 +75,12 @@ class PricingTier(Base):
     output_price = Column(Float, nullable=False)  # USD per million tokens
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class SystemSetting(Base):
+    """System settings and cached data like DeepSeek balance"""
+    __tablename__ = "system_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(100), unique=True, nullable=False, index=True)
+    value = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
