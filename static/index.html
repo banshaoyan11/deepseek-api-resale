@@ -76,6 +76,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .pricing-table td { color: #e0e0e0; }
 .pricing-table tr:last-child td { border-bottom: none; }
 .i18n-note { color: #888; font-size: 0.78em; line-height: 1.6; }
+.tutorial-step { padding-left: 20px; border-left: 2px solid #2a2a4a; margin-bottom: 20px; position: relative; }
+.tutorial-step:last-child { margin-bottom: 0; }
+.tutorial-step-num { position: absolute; left: -14px; top: 0; width: 26px; height: 26px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 50%; text-align: center; line-height: 26px; font-size: 0.78em; font-weight: 700; color: white; }
+.code-block { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 8px; margin: 10px 0; overflow: hidden; }
+.code-block-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #12121f; border-bottom: 1px solid #2a2a4a; }
+.code-block-lang { color: #666; font-size: 0.75em; }
+.code-block-copy { background: #2a2a4a; color: #a78bfa; border: none; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 0.72em; }
+.code-block-copy:hover { background: #3a3a5a; }
+.code-block pre { margin: 0; padding: 14px; overflow-x: auto; font-size: 0.82em; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; color: #c9d1d9; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+.tutorial-toc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tutorial-toc a { color: #a78bfa; text-decoration: none; padding: 4px 12px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 6px; font-size: 0.82em; cursor: pointer; }
+.tutorial-toc a:hover { border-color: #6366f1; }
 </style>
 </head>
 <body>
@@ -119,6 +131,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys" data-i18n="api_keys">API Keys</span>
       <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup" data-i18n="top_up">Top Up</span>
       <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats" data-i18n="usage">Usage</span>
+      <span class="nav-item" onclick="switchDashTab('tutorial')" id="dtab-tutorial" data-i18n="tutorial">Tutorial</span>
       <span class="nav-item hidden" onclick="switchDashTab('admin')" id="dtab-admin" data-i18n="admin">Admin</span>
       <span class="nav-item logout" onclick="doLogout()" data-i18n="logout">Logout</span>
       <span class="nav-lang">
@@ -235,6 +248,221 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         <div id="admin-transactions-list"><div class="loading"><div class="spinner"></div><span>Loading...</span></div></div>
       </div>
     </div>
+
+    <!-- Tutorial -->
+    <div id="dash-tutorial" class="hidden">
+      <div class="tutorial-toc">
+        <a onclick="document.getElementById('tut-install').scrollIntoView({behavior:'smooth'})" data-i18n="tut_toc_install">1. Install OpenClaw</a>
+        <a onclick="document.getElementById('tut-configure').scrollIntoView({behavior:'smooth'})" data-i18n="tut_toc_config">2. Add DeepSeek Provider</a>
+        <a onclick="document.getElementById('tut-start').scrollIntoView({behavior:'smooth'})" data-i18n="tut_toc_start">3. Launch & Chat</a>
+        <a onclick="document.getElementById('tut-api').scrollIntoView({behavior:'smooth'})" data-i18n="tut_toc_api">4. API Usage in Code</a>
+      </div>
+
+      <!-- Section 1: Install -->
+      <div class="card" id="tut-install">
+        <h3>Step 1 — <span data-i18n="tut_install_title">Install OpenClaw</span></h3>
+        <p class="i18n-note" data-i18n="tut_install_desc">OpenClaw is an open-source AI gateway + TUI chat client. It runs locally with one command.</p>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">1</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_install_node">Make sure Node.js 20+ is installed:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>node --version</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">2</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_install_ollama">(Optional but recommended) Install Ollama for local models:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">macOS / Windows / Linux</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>curl -fsSL https://ollama.com/install.sh | sh</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">3</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_install_npm">Install OpenClaw globally via npm:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>npm install -g openclaw</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">4</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_install_verify">Verify installation:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>openclaw --version</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Configure -->
+      <div class="card" id="tut-configure">
+        <h3>Step 2 — <span data-i18n="tut_config_title">Add DeepSeek Provider</span></h3>
+        <p class="i18n-note" data-i18n="tut_config_desc">Configure OpenClaw to use your DeepSeek API key from this platform. Edit the config file:</p>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">1</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_config_edit">Open your OpenClaw config file:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang" data-i18n="tut_config_path">Location</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>~/.openclaw/openclaw.json</pre>
+          </div>
+          <p style="color:#666;font-size:0.78em;margin-top:4px;" data-i18n="tut_config_path_full">Full path: C:\Users\YOURNAME\.openclaw\openclaw.json (Windows) or ~/.openclaw/openclaw.json (macOS/Linux)</p>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">2</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_config_paste">Add this provider config inside the <code style="color:#6366f1;">"providers"</code> section. Replace <code style="color:#f59e0b;">YOUR_API_KEY</code> with the key generated on your <a href="javascript:switchDashTab('apikeys')" style="color:#a78bfa;">API Keys</a> page:</p>
+          <div class="code-block">
+            <div class="code-block-header">
+              <span class="code-block-lang">openclaw.json</span>
+              <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre>{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://deepseek-api-resale-production.up.railway.app/v1",
+        "apiKey": "YOUR_API_KEY",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-v4-pro",
+            "name": "DeepSeek V4 Pro",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "deepseek-v4-flash",
+            "name": "DeepSeek V4 Flash",
+            "contextWindow": 1000000
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "deepseek/deepseek-v4-flash",
+        "fallbacks": ["deepseek/deepseek-v4-pro"]
+      }
+    }
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">3</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_config_model">Set the default model for your agents:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">openclaw.json</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>"model": {
+  "primary": "deepseek/deepseek-v4-flash"
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Launch -->
+      <div class="card" id="tut-start">
+        <h3>Step 3 — <span data-i18n="tut_start_title">Launch Gateway & Start Chatting</span></h3>
+        <p class="i18n-note" data-i18n="tut_start_desc">OpenClaw runs a local Gateway that handles all AI requests. You need two terminals:</p>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">1</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_start_gateway">Terminal 1 — Start the Gateway (keep it running):</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal 1</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>openclaw gateway run</pre>
+          </div>
+          <p style="color:#10b981;font-size:0.78em;margin-top:4px;" data-i18n="tut_start_gateway_wait">Wait until you see "[gateway] ready" — this means everything is working.</p>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">2</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_start_tui">Terminal 2 — Launch the chat interface:</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal 2</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>openclaw tui</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">3</div>
+          <p style="margin-bottom:6px;" data-i18n="tut_start_chat">That's it! Type your message and press Enter. The AI will respond using your DeepSeek V4 model.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">TUI Chat</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>You: Hello, introduce yourself!
+AI: Hello! I'm DeepSeek V4, an AI assistant powered by...</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: API -->
+      <div class="card" id="tut-api">
+        <h3>Step 4 — <span data-i18n="tut_api_title">Use API in Your Code</span></h3>
+        <p class="i18n-note" data-i18n="tut_api_desc">You can also call DeepSeek directly from any OpenAI-compatible SDK. Just point it to our endpoint:</p>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">🐍</div>
+          <p style="margin-bottom:6px;font-weight:600;color:#a78bfa;">Python</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://deepseek-api-resale-production.up.railway.app/v1"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-v4-flash",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">🟩</div>
+          <p style="margin-bottom:6px;font-weight:600;color:#a78bfa;">Node.js</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Node.js</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://deepseek-api-resale-production.up.railway.app/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "deepseek-v4-flash",
+  messages: [{ role: "user", content: "Hello!" }],
+});
+console.log(response.choices[0].message.content);</pre>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-num">📟</div>
+          <p style="margin-bottom:6px;font-weight:600;color:#a78bfa;">curl (any language)</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-block-lang">Terminal</span><button class="code-block-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre>curl https://deepseek-api-resale-production.up.railway.app/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"Hi"}]}'</pre>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -266,6 +494,7 @@ const I18N = {
     api_keys: 'API Keys',
     top_up: 'Top Up',
     usage: 'Usage',
+    tutorial: 'Tutorial',
     logout: 'Logout',
     current_balance: 'Current Balance (USD)',
     signed_in_as: 'Signed in as',
@@ -319,7 +548,32 @@ const I18N = {
     default_key_name: 'Default Key',
     payment_pending: 'Payment pending. After completing payment in PayPal, click below:',
     confirm_payment: "I've Completed Payment",
-    payment_success: 'Payment successful! Balance updated.'
+    payment_success: 'Payment successful! Balance updated.',
+    tut_toc_install: '1. Install OpenClaw',
+    tut_toc_config: '2. Add DeepSeek Provider',
+    tut_toc_start: '3. Launch & Chat',
+    tut_toc_api: '4. API Usage in Code',
+    tut_install_title: 'Install OpenClaw',
+    tut_install_desc: 'OpenClaw is an open-source AI gateway + TUI chat client. It runs locally with one command.',
+    tut_install_node: 'Make sure Node.js 20+ is installed:',
+    tut_install_ollama: '(Optional but recommended) Install Ollama for local models:',
+    tut_install_npm: 'Install OpenClaw globally via npm:',
+    tut_install_verify: 'Verify installation:',
+    tut_config_title: 'Add DeepSeek Provider',
+    tut_config_desc: 'Configure OpenClaw to use your DeepSeek API key from this platform. Edit the config file:',
+    tut_config_edit: 'Open your OpenClaw config file:',
+    tut_config_path: 'Location',
+    tut_config_path_full: 'Full path: C:\\Users\\YOURNAME\\.openclaw\\openclaw.json (Windows) or ~/.openclaw/openclaw.json (macOS/Linux)',
+    tut_config_paste: 'Add this provider config inside the "providers" section. Replace YOUR_API_KEY with the key generated on your API Keys page:',
+    tut_config_model: 'Set the default model for your agents:',
+    tut_start_title: 'Launch Gateway & Start Chatting',
+    tut_start_desc: 'OpenClaw runs a local Gateway that handles all AI requests. You need two terminals:',
+    tut_start_gateway: 'Terminal 1 — Start the Gateway (keep it running):',
+    tut_start_gateway_wait: 'Wait until you see "[gateway] ready" — this means everything is working.',
+    tut_start_tui: 'Terminal 2 — Launch the chat interface:',
+    tut_start_chat: "That's it! Type your message and press Enter. The AI will respond using your DeepSeek V4 model.",
+    tut_api_title: 'Use API in Your Code',
+    tut_api_desc: 'You can also call DeepSeek directly from any OpenAI-compatible SDK. Just point it to our endpoint:'
   },
   zh: {
     hero_sub: '高性能 · 低价格 · OpenAI 兼容',
@@ -339,6 +593,7 @@ const I18N = {
     api_keys: 'API 密钥',
     top_up: '充值',
     usage: '用量',
+    tutorial: '教程',
     logout: '退出',
     current_balance: '当前余额 (USD)',
     signed_in_as: '当前用户',
@@ -392,11 +647,49 @@ const I18N = {
     default_key_name: '默认密钥',
     payment_pending: '支付进行中。在 PayPal 完成支付后，点击下方按钮：',
     confirm_payment: '我已完成支付',
-    payment_success: '支付成功！余额已更新。'
+    payment_success: '支付成功！余额已更新。',
+    tut_toc_install: '1. 安装 OpenClaw',
+    tut_toc_config: '2. 接入 DeepSeek 模型',
+    tut_toc_start: '3. 启动与对话',
+    tut_toc_api: '4. API 代码集成',
+    tut_install_title: '安装 OpenClaw',
+    tut_install_desc: 'OpenClaw 是一个开源 AI 网关 + 终端聊天客户端。一行命令即可本地运行。',
+    tut_install_node: '确保已安装 Node.js 20+：',
+    tut_install_ollama: '（推荐）安装 Ollama 以支持本地模型：',
+    tut_install_npm: '通过 npm 全局安装 OpenClaw：',
+    tut_install_verify: '验证安装成功：',
+    tut_config_title: '接入 DeepSeek 模型',
+    tut_config_desc: '将你在本平台生成的 API 密钥配置到 OpenClaw 中。编辑配置文件：',
+    tut_config_edit: '打开 OpenClaw 配置文件：',
+    tut_config_path: '文件位置',
+    tut_config_path_full: '完整路径：C:\\Users\\用户名\\.openclaw\\openclaw.json（Windows）或 ~/.openclaw/openclaw.json（macOS/Linux）',
+    tut_config_paste: '将以下配置添加到 "providers" 部分。把 YOUR_API_KEY 替换成你在 API 密钥页面生成的密钥：',
+    tut_config_model: '设置 Agent 的默认模型：',
+    tut_start_title: '启动网关并开始对话',
+    tut_start_desc: 'OpenClaw 运行一个本地网关来处理所有 AI 请求。需要两个终端窗口：',
+    tut_start_gateway: '终端 1 — 启动网关（保持运行）：',
+    tut_start_gateway_wait: '等到出现 "[gateway] ready" — 表示一切就绪。',
+    tut_start_tui: '终端 2 — 启动聊天界面：',
+    tut_start_chat: '搞定！输入消息按回车，AI 就会用你的 DeepSeek V4 模型回复。',
+    tut_api_title: '在代码中使用 API',
+    tut_api_desc: '你也可以在任何兼容 OpenAI 格式的 SDK 中直接调用 DeepSeek：'
   }
 };
 
 function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key; }
+
+function copyCode(btn) {
+  var block = btn.closest('.code-block');
+  var pre = block.querySelector('pre');
+  var text = pre.textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+  }).catch(function(){
+    btn.textContent = 'Failed';
+    setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+  });
+}
 
 function setLang(lang) {
   currentLang = lang;
@@ -508,7 +801,7 @@ function switchDashTab(tab) {
   document.querySelectorAll('#dashboard-view .nav-item').forEach(function(t){ t.classList.remove('active'); });
   var el = document.getElementById('dtab-' + tab);
   if (el) el.classList.add('active');
-  ['overview','apikeys','topup','stats','admin'].forEach(function(t){ setDisplay('dash-' + t, t === tab); });
+  ['overview','apikeys','topup','stats','tutorial','admin'].forEach(function(t){ setDisplay('dash-' + t, t === tab); });
   if (tab === 'apikeys') loadApiKeys();
   if (tab === 'admin') loadAdminPanel();
   if (tab === 'stats') loadUsageStats();
