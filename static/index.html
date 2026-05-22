@@ -118,6 +118,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <span class="nav-item" onclick="switchDashTab('apikeys')" id="dtab-apikeys" data-i18n="api_keys">API Keys</span>
       <span class="nav-item" onclick="switchDashTab('topup')" id="dtab-topup" data-i18n="top_up">Top Up</span>
       <span class="nav-item" onclick="switchDashTab('stats')" id="dtab-stats" data-i18n="usage">Usage</span>
+      <span class="nav-item hidden" onclick="switchDashTab('admin')" id="dtab-admin" data-i18n="admin">Admin</span>
       <span class="nav-item logout" onclick="doLogout()" data-i18n="logout">Logout</span>
       <span class="nav-lang">
         <button onclick="setLang('en')" id="nav-lang-en">EN</button>
@@ -212,6 +213,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="output_tokens">Output Tokens</div></div>
           <div class="stat-card"><div class="stat-value">-</div><div class="stat-label" data-i18n="total_cost">Total Cost</div></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="dash-admin" class="hidden">
+      <div class="card">
+        <h3>System Status</h3>
+        <div id="system-status-content"><div class="loading"><div class="spinner"></div><span>Loading...</span></div></div>
+      </div>
+      <div class="card">
+        <h3>Users</h3>
+        <div id="admin-users-list"><div class="loading"><div class="spinner"></div><span>Loading...</span></div></div>
+      </div>
+      <div class="card">
+        <h3>Transactions</h3>
+        <div id="admin-transactions-list"><div class="loading"><div class="spinner"></div><span>Loading...</span></div></div>
       </div>
     </div>
   </div>
@@ -487,8 +504,9 @@ function switchDashTab(tab) {
   document.querySelectorAll('#dashboard-view .nav-item').forEach(function(t){ t.classList.remove('active'); });
   var el = document.getElementById('dtab-' + tab);
   if (el) el.classList.add('active');
-  ['overview','apikeys','topup','stats'].forEach(function(t){ setDisplay('dash-' + t, t === tab); });
+  ['overview','apikeys','topup','stats','admin'].forEach(function(t){ setDisplay('dash-' + t, t === tab); });
   if (tab === 'apikeys') loadApiKeys();
+  if (tab === 'admin') loadAdminPanel();
   if (tab === 'stats') loadUsageStats();
   if (tab === 'overview') loadOverview();
 }
@@ -497,7 +515,23 @@ async function showDashboard() {
   setDisplay('auth-view', false);
   setDisplay('dashboard-view', true);
   await loadOverview();
+  await checkAdminAccess();
   switchDashTab('overview');
+}
+
+async function checkAdminAccess() {
+  try {
+    var me = await api('GET', '/auth/me');
+    // Check if user is admin
+    var adminEmails = ['admin@deepseek-api-resale.com', 'banshaoyan11@qq.com'];
+    if (adminEmails.includes(me.email)) {
+      document.getElementById('dtab-admin').classList.remove('hidden');
+    } else {
+      document.getElementById('dtab-admin').classList.add('hidden');
+    }
+  } catch(e) {
+    document.getElementById('dtab-admin').classList.add('hidden');
+  }
 }
 
 async function loadOverview() {
@@ -534,6 +568,120 @@ function formatTokens(num) {
     return '~' + (num / 1000).toFixed(0) + 'K';
   }
   return '~' + num;
+}
+
+// Admin Panel
+async function loadAdminPanel() {
+  await loadSystemStatus();
+  await loadAdminUsers();
+  await loadAdminTransactions();
+}
+
+async function loadSystemStatus() {
+  try {
+    var status = await api('GET', '/admin/system-status');
+    
+    var warningsHtml = '';
+    if (status.warnings && status.warnings.length > 0) {
+      warningsHtml = status.warnings.map(w => 
+        '<div class="alert alert-error" style="margin-bottom:12px;">⚠️ ' + w + '</div>'
+      ).join('');
+    }
+    
+    var metrics = status.metrics;
+    document.getElementById('system-status-content').innerHTML = 
+      warningsHtml +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">' +
+      '<div style="background:#0f0f1a;padding:12px;border-radius:8px;text-align:center;">' +
+        '<div style="font-size:1.3em;font-weight:700;color:#a78bfa;">' + metrics.total_users + '</div>' +
+        '<div style="font-size:0.75em;color:#666;">Total Users</div>' +
+      '</div>' +
+      '<div style="background:#0f0f1a;padding:12px;border-radius:8px;text-align:center;">' +
+        '<div style="font-size:1.3em;font-weight:700;color:#10b981;">' + metrics.total_transactions + '</div>' +
+        '<div style="font-size:0.75em;color:#666;">Transactions</div>' +
+      '</div>' +
+      '<div style="background:#0f0f1a;padding:12px;border-radius:8px;text-align:center;">' +
+        '<div style="font-size:1.3em;font-weight:700;color:#f59e0b;">$' + metrics.total_revenue.toFixed(2) + '</div>' +
+        '<div style="font-size:0.75em;color:#666;">Revenue</div>' +
+      '</div>' +
+      '<div style="background:#0f0f1a;padding:12px;border-radius:8px;text-align:center;">' +
+        '<div style="font-size:1.3em;font-weight:700;color:#ef4444;">$' + metrics.total_user_balances.toFixed(2) + '</div>' +
+        '<div style="font-size:0.75em;color:#666;">User Balances</div>' +
+      '</div>' +
+      '</div>' +
+      '<div style="margin-top:12px;padding:12px;background:#0f0f1a;border-radius:8px;">' +
+        '<div style="font-size:0.85em;color:#888;margin-bottom:4px;">DeepSeek API Balance</div>' +
+        '<div style="font-size:1.2em;font-weight:700;color:' + 
+          (metrics.deepseek_balance && metrics.deepseek_balance < 10 ? '#ef4444' : '#10b981') + ';">' +
+          (metrics.deepseek_balance ? '$' + metrics.deepseek_balance.toFixed(2) : 'N/A') +
+        '</div>' +
+      '</div>';
+  } catch(e) {
+    document.getElementById('system-status-content').innerHTML = 
+      '<div class="alert alert-error">Failed to load system status: ' + e.message + '</div>';
+  }
+}
+
+async function loadAdminUsers() {
+  try {
+    var users = await api('GET', '/admin/users');
+    if (users.length === 0) {
+      document.getElementById('admin-users-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">No users found</p>';
+    } else {
+      document.getElementById('admin-users-list').innerHTML = 
+        '<table style="width:100%;border-collapse:collapse;font-size:0.85em;">' +
+        '<tr style="color:#888;font-weight:normal;">' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid #2a2a4a;">Email</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid #2a2a4a;">Name</th>' +
+          '<th style="text-align:right;padding:8px;border-bottom:1px solid #2a2a4a;">Balance</th>' +
+          '<th style="text-align:right;padding:8px;border-bottom:1px solid #2a2a4a;">Created</th>' +
+        '</tr>' +
+        users.map(u => 
+          '<tr style="border-bottom:1px solid #1a1a2e;">' +
+            '<td style="padding:8px;">' + u.email + '</td>' +
+            '<td style="padding:8px;">' + (u.full_name || '-') + '</td>' +
+            '<td style="padding:8px;text-align:right;color:#10b981;">$' + u.balance.toFixed(2) + '</td>' +
+            '<td style="padding:8px;text-align:right;color:#666;">' + new Date(u.created_at).toLocaleDateString() + '</td>' +
+          '</tr>'
+        ).join('') +
+        '</table>';
+    }
+  } catch(e) {
+    document.getElementById('admin-users-list').innerHTML = 
+      '<div class="alert alert-error">Failed to load users: ' + e.message + '</div>';
+  }
+}
+
+async function loadAdminTransactions() {
+  try {
+    var transactions = await api('GET', '/admin/transactions');
+    if (transactions.length === 0) {
+      document.getElementById('admin-transactions-list').innerHTML = '<p style="color:#666;text-align:center;padding:20px;">No transactions found</p>';
+    } else {
+      document.getElementById('admin-transactions-list').innerHTML = 
+        '<table style="width:100%;border-collapse:collapse;font-size:0.85em;">' +
+        '<tr style="color:#888;font-weight:normal;">' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid #2a2a4a;">User</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid #2a2a4a;">Type</th>' +
+          '<th style="text-align:right;padding:8px;border-bottom:1px solid #2a2a4a;">Amount</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid #2a2a4a;">Description</th>' +
+          '<th style="text-align:right;padding:8px;border-bottom:1px solid #2a2a4a;">Date</th>' +
+        '</tr>' +
+        transactions.map(t => 
+          '<tr style="border-bottom:1px solid #1a1a2e;">' +
+            '<td style="padding:8px;">#' + t.user_id + '</td>' +
+            '<td style="padding:8px;">' + t.type + '</td>' +
+            '<td style="padding:8px;text-align:right;color:' + (t.amount > 0 ? '#10b981' : '#ef4444') + ';">' + (t.amount > 0 ? '+' : '') + '$' + t.amount.toFixed(2) + '</td>' +
+            '<td style="padding:8px;">' + t.description + '</td>' +
+            '<td style="padding:8px;text-align:right;color:#666;">' + new Date(t.created_at).toLocaleString() + '</td>' +
+          '</tr>'
+        ).join('') +
+        '</table>';
+    }
+  } catch(e) {
+    document.getElementById('admin-transactions-list').innerHTML = 
+      '<div class="alert alert-error">Failed to load transactions: ' + e.message + '</div>';
+  }
 }
 
 // API Keys

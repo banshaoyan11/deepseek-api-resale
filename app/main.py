@@ -10,7 +10,7 @@ import os
 from app.config import settings
 from app.database import engine, Base
 from app.models import User, APIKey, UsageLog, Transaction, PricingTier
-from app.routers import auth_router, api_keys_router, billing_router, gateway_router
+from app.routers import auth_router, api_keys_router, billing_router, gateway_router, admin_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,6 +55,7 @@ app.include_router(auth_router)
 app.include_router(api_keys_router)
 app.include_router(billing_router)
 app.include_router(gateway_router)
+app.include_router(admin_router)
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 
