@@ -1,6 +1,7 @@
 # app/routers/gateway.py
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 import json
 import time
 from datetime import datetime
