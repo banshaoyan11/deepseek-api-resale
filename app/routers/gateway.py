@@ -4,10 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import json
 import time
+import logging
 from datetime import datetime
 from app.database import get_db
 from app.models import User, APIKey
 from app.auth import verify_api_key, verify_api_key_anthropic
+
+logger = logging.getLogger("gateway")
 from app.services import deepseek_service, billing_service
 
 router = APIRouter(tags=["API Gateway"])
@@ -53,6 +56,9 @@ async def chat_completions(
         )
 
     model = request_data.get("model", "deepseek-v4-flash")
+    msg_count = len(request_data.get("messages", []))
+    has_tools = "tools" in request_data
+    logger.info(f"[REQ] model={model} messages={msg_count} has_tools={has_tools}")
 
     total_text = ""
     for msg in request_data["messages"]:
@@ -79,6 +85,11 @@ async def chat_completions(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"DeepSeek API error: {str(e)}"
         )
+
+    chat_content = ""
+    for choice in response.get("choices", []):
+        chat_content += str(choice.get("message", {}).get("content", ""))
+    logger.info(f"[CHAT] model={model} tokens=in:{response.get('usage',{}).get('prompt_tokens',0)}/out:{response.get('usage',{}).get('completion_tokens',0)} content_preview={chat_content[:200]}")
 
     usage = response.get("usage", {})
     input_tokens = usage.get("prompt_tokens", 0)
