@@ -134,6 +134,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .reseller-compare .check { color: #10b981; }
 .reseller-compare .cross { color: #f87171; }
 .reseller-compare .our-col { background: rgba(99, 102, 241, 0.06); }
+.pg-thinking { display: flex; align-items: center; gap: 6px; padding: 10px 14px; color: #888; font-size: 0.82em; }
+.pg-thinking .dots { display: flex; gap: 3px; }
+.pg-thinking .dots span { width: 5px; height: 5px; background: #6366f1; border-radius: 50%; animation: bounce 1s infinite; }
+.pg-thinking .dots span:nth-child(2) { animation-delay: 0.2s; }
+.pg-thinking .dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+.cta-trial { border: 1px solid #10b981 !important; background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02)) !important; }
+.cta-trial h3 { color: #10b981 !important; }
+.cta-trial .btn-trial { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; font-weight: 600; }
+.cta-trial .btn-trial:hover { opacity: 0.9; transform: translateY(-1px); }
+.member-plan { border: 1px solid #a78bfa !important; background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(59,130,246,0.03)) !important; }
+.member-plan h3 { color: #a78bfa !important; }
+.member-plan .plan-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a1a2e; }
+.member-plan .plan-row:last-child { border-bottom: none; }
+.member-plan .plan-name { font-weight: 600; font-size: 0.9em; }
+.member-plan .plan-price { color: #a78bfa; font-weight: 700; font-size: 0.95em; }
+.member-plan .plan-desc { color: #666; font-size: 0.75em; }
+.member-plan .plan-save { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1px 8px; border-radius: 8px; font-size: 0.65em; font-weight: 600; margin-left: 6px; }
+.trial-highlight { display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 3px 12px; border-radius: 10px; font-size: 0.75em; font-weight: 700; margin-bottom: 6px; }
+.auth-promo { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: linear-gradient(135deg, #1a1a3e, #1a1a2e); border: 1px solid #6366f1; border-radius: 10px; margin-bottom: 10px; }
+.auth-promo .ap-icon { font-size: 1.6em; }
+.auth-promo .ap-text { flex: 1; font-size: 0.88em; line-height: 1.5; color: #c0c0c0; }
+.auth-promo .ap-text strong { color: #a78bfa; }
+.auth-promo button { padding: 8px 20px; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85em; font-weight: 500; white-space: nowrap; }
+.auth-promo button:hover { opacity: 0.9; }
 </style>
 </head>
 <body>
@@ -189,12 +214,67 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         <div class="playground-msgs" id="pg-msgs">
           <div class="pg-placeholder" data-i18n="pg_placeholder">Ask anything about coding, writing, or analysis...</div>
         </div>
+        <div id="pg-thinking" class="pg-thinking hidden">
+          <span data-i18n="pg_thinking">AI is thinking</span>
+          <div class="dots"><span></span><span></span><span></span></div>
+        </div>
         <div class="pg-input-row">
           <input type="text" id="pg-input" data-i18n-placeholder="pg_input_ph" placeholder="Type your message here..." onkeydown="if(event.key==='Enter') sendPgMessage()">
           <button onclick="sendPgMessage()" id="pg-send-btn">Send</button>
         </div>
         <p class="i18n-note" style="margin-top:8px;" data-i18n="pg_signup_hint">Want unlimited access? <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#a78bfa;">Sign up</a> and get your own API key.</p>
       </div>
+    </div>
+
+    <!-- Trial CTA Card -->
+    <div class="card cta-trial" style="text-align:center;">
+      <div class="trial-highlight" data-i18n="trial_badge">🎯 SPECIAL OFFER</div>
+      <h3 data-i18n="trial_title">Try Full DeepSeek V4 for Just $1</h3>
+      <p style="color:#aaa;font-size:0.88em;margin:8px 0;" data-i18n="trial_desc">Get ~2 million tokens. No limits, no throttling, full 1M context. Cancel anytime.</p>
+      <button class="btn-trial" onclick="switchAuthTab('register')" data-i18n="trial_btn">Start $1 Trial →</button>
+      <p style="color:#666;font-size:0.72em;margin-top:6px;" data-i18n="trial_note">One-time purchase. No auto-renewal. No hidden fees.</p>
+    </div>
+
+    <!-- Member Plans -->
+    <div class="card member-plan">
+      <h3 data-i18n="member_title">💎 Membership Plans</h3>
+      <div class="plan-row">
+        <div>
+          <div class="plan-name" data-i18n="plan_trial_name">Trial</div>
+          <div class="plan-desc" data-i18n="plan_trial_desc">~2M tokens · full features</div>
+        </div>
+        <div>
+          <div class="plan-price">$1</div>
+        </div>
+      </div>
+      <div class="plan-row">
+        <div>
+          <div class="plan-name" data-i18n="plan_starter_name">Starter</div>
+          <div class="plan-desc" data-i18n="plan_starter_desc">~10M tokens · best for individuals</div>
+        </div>
+        <div>
+          <div class="plan-price">$10 <span class="plan-save">Popular</span></div>
+        </div>
+      </div>
+      <div class="plan-row">
+        <div>
+          <div class="plan-name" data-i18n="plan_pro_name">Pro</div>
+          <div class="plan-desc" data-i18n="plan_pro_desc">~50M tokens · for power users</div>
+        </div>
+        <div>
+          <div class="plan-price">$50 <span class="plan-save">Save 10%</span></div>
+        </div>
+      </div>
+      <div class="plan-row">
+        <div>
+          <div class="plan-name" data-i18n="plan_team_name">Team</div>
+          <div class="plan-desc" data-i18n="plan_team_desc">~200M tokens · for startups</div>
+        </div>
+        <div>
+          <div class="plan-price">$200 <span class="plan-save">Save 20%</span></div>
+        </div>
+      </div>
+      <p class="i18n-note" style="margin-top:10px;text-align:center;" data-i18n="member_footer">All plans: unlimited rate, 1M context, OpenAI-compatible API. Sign up to purchase.</p>
     </div>
 
     <div class="card pricing-compare">
@@ -318,6 +398,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </tbody>
       </table>
       <p class="i18n-note" style="margin-top:10px;" data-i18n="reseller_note">Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed.</p>
+    </div>
+
+    <!-- Auth Promo Banner -->
+    <div class="auth-promo" id="auth-promo-register">
+      <div class="ap-icon">🚀</div>
+      <div class="ap-text">
+        <span data-i18n="auth_promo_text">Ready to get started? <strong>$1 gives you ~2 million tokens</strong> — full speed, full model, no strings attached.</span>
+      </div>
+      <button onclick="switchAuthTab('register')" data-i18n="auth_promo_btn">Claim $1 Trial</button>
     </div>
 
     <div class="tabs">
@@ -821,7 +910,25 @@ const I18N = {
     reseller_price: 'Input price / 1M tokens',
     reseller_direct: 'Direct official API',
     reseller_openai: 'OpenAI-compatible',
-    reseller_note: "Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed."
+    reseller_note: "Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed.",
+    pg_thinking: 'AI is thinking',
+    trial_badge: '🎯 SPECIAL OFFER',
+    trial_title: 'Try Full DeepSeek V4 for Just $1',
+    trial_desc: 'Get ~2 million tokens. No limits, no throttling, full 1M context. Cancel anytime.',
+    trial_btn: 'Start $1 Trial →',
+    trial_note: 'One-time purchase. No auto-renewal. No hidden fees.',
+    member_title: '💎 Membership Plans',
+    plan_trial_name: 'Trial',
+    plan_trial_desc: '~2M tokens · full features',
+    plan_starter_name: 'Starter',
+    plan_starter_desc: '~10M tokens · best for individuals',
+    plan_pro_name: 'Pro',
+    plan_pro_desc: '~50M tokens · for power users',
+    plan_team_name: 'Team',
+    plan_team_desc: '~200M tokens · for startups',
+    member_footer: 'All plans: unlimited rate, 1M context, OpenAI-compatible API. Sign up to purchase.',
+    auth_promo_text: 'Ready to get started? $1 gives you ~2 million tokens — full speed, full model, no strings attached.',
+    auth_promo_btn: 'Claim $1 Trial'
   },
   zh: {
     hero_sub: '高性能 · 低价格 · OpenAI 兼容',
@@ -951,7 +1058,25 @@ const I18N = {
     reseller_price: '输入价格 / 1M tokens',
     reseller_direct: '直连官方 API',
     reseller_openai: 'OpenAI 兼容',
-    reseller_note: '多数转售商通过第三方中转，加价且限速。我们直连 DeepSeek 官方 API — 真正满血，真正全速。'
+    reseller_note: '多数转售商通过第三方中转，加价且限速。我们直连 DeepSeek 官方 API — 真正满血，真正全速。',
+    pg_thinking: 'AI 正在思考中',
+    trial_badge: '🎯 限时特惠',
+    trial_title: '$1 即可体验满血 DeepSeek V4',
+    trial_desc: '约 200 万 tokens。不限速，不缩水，100 万上下文窗口。随时可停。',
+    trial_btn: '开始 $1 体验 →',
+    trial_note: '一次性购买，不自动续费，无隐藏收费。',
+    member_title: '💎 会员方案',
+    plan_trial_name: '体验包',
+    plan_trial_desc: '~200万 tokens · 全部功能',
+    plan_starter_name: '入门包',
+    plan_starter_desc: '~1000万 tokens · 个人用户首选',
+    plan_pro_name: '专业包',
+    plan_pro_desc: '~5000万 tokens · 重度用户',
+    plan_team_name: '团队包',
+    plan_team_desc: '~2亿 tokens · 初创团队',
+    member_footer: '所有方案：不限速、100万上下文、OpenAI 兼容。注册即可购买。',
+    auth_promo_text: '准备开始了吗？$1 即可获得约 200 万 tokens — 满血模型，全速访问，无任何附加条件。',
+    auth_promo_btn: '领取 $1 体验'
   }
 };
 
@@ -1001,6 +1126,10 @@ async function sendPgMessage() {
   var btn = document.getElementById('pg-send-btn');
   btn.disabled = true;
   btn.textContent = '...';
+  var thinking = document.getElementById('pg-thinking');
+  thinking.classList.remove('hidden');
+  var msgs = document.getElementById('pg-msgs');
+  msgs.scrollTop = msgs.scrollHeight;
 
   try {
     var r = await fetch(API_BASE + '/playground/chat', {
@@ -1009,6 +1138,7 @@ async function sendPgMessage() {
       body: JSON.stringify({ message: msg, model: pgModel })
     });
     var data = await r.json();
+    thinking.classList.add('hidden');
     if (r.ok) {
       appendPgMsg('ai', data.reply);
       var rem = document.getElementById('pg-remaining');
@@ -1017,6 +1147,7 @@ async function sendPgMessage() {
       appendPgMsg('ai', 'Error: ' + (data.detail || 'Something went wrong'));
     }
   } catch(e) {
+    document.getElementById('pg-thinking').classList.add('hidden');
     appendPgMsg('ai', 'Network error. Please try again.');
   }
   pgLoading = false;
