@@ -127,74 +127,94 @@ async def get_all_transactions(
 
 async def check_deepseek_balance():
     """Check DeepSeek API balance using their API"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     if not settings.DEEPSEEK_API_KEY:
+        logger.warning("DEEPSEEK_API_KEY not configured")
         return None
     
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            # Try DeepSeek's balance endpoint
-            # First, let's try the API key info endpoint
-            response = await client.get(
-                f"{settings.DEEPSEEK_BASE_URL}/v1/balance",
-                headers={"Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}"}
-            )
+            # Try DeepSeek's balance endpoint - common format
+            endpoints = [
+                (f"{settings.DEEPSEEK_BASE_URL}/v1/balance", "GET"),
+                (f"{settings.DEEPSEEK_BASE_URL}/v1/user/balance", "GET"),
+                (f"{settings.DEEPSEEK_BASE_URL}/v1/dashboard/billing/subscription", "GET"),
+                (f"{settings.DEEPSEEK_BASE_URL}/v1/balance", "POST"),
+            ]
             
-            if response.status_code == 200:
-                data = response.json()
-                # Try different possible response formats
-                if 'balance' in data:
-                    return float(data['balance'])
-                elif 'total_balance' in data:
-                    return float(data['total_balance'])
-                elif 'available_balance' in data:
-                    return float(data['available_balance'])
-                elif 'amount' in data:
-                    return float(data['amount'])
-            elif response.status_code == 402:
-                # Payment required - balance is zero
-                return 0.0
-            elif response.status_code == 401:
-                # Unauthorized - invalid API key
-                print("Invalid DeepSeek API key")
-                return None
+            for endpoint, method in endpoints:
+                try:
+                    logger.info(f"Trying endpoint: {endpoint} ({method})")
+                    
+                    if method == "GET":
+                        response = await client.get(
+                            endpoint,
+                            headers={
+                                "Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}",
+                                "Content-Type": "application/json"
+                            }
+                        )
+                    else:
+                        response = await client.post(
+                            endpoint,
+                            headers={
+                                "Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}",
+                                "Content-Type": "application/json"
+                            },
+                            json={}
+                        )
+                    
+                    logger.info(f"Response from {endpoint}: status={response.status_code}")
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        logger.info(f"Response data: {data}")
+                        
+                        # Try different possible response formats
+                        balance = None
+                        if isinstance(data, dict):
+                            for key in ['balance', 'total_balance', 'available_balance', 
+                                       'amount', 'remaining', 'credit_balance']:
+                                if key in data:
+                                    try:
+                                        balance = float(data[key])
+                                        logger.info(f"Found balance in '{key}': {balance}")
+                                        return balance
+                                    except (ValueError, TypeError):
+                                        continue
+                        
+                        # If balance found in response
+                        if balance is not None:
+                            return balance
+                            
+                    elif response.status_code == 402:
+                        # Payment required - balance is zero
+                        logger.info("Got 402 - balance is zero")
+                        return 0.0
+                    elif response.status_code == 401:
+                        logger.error("Invalid DeepSeek API key")
+                        return None
+                    elif response.status_code == 404:
+                        logger.info(f"Endpoint not found: {endpoint}")
+                        continue
+                    else:
+                        logger.info(f"Unexpected status: {response.status_code}")
+                        continue
+                        
+                except Exception as e:
+                    logger.warning(f"Error with {endpoint}: {str(e)}")
+                    continue
             
-            # Try alternative endpoint: /v1/user/usage
-            try:
-                usage_response = await client.get(
-                    f"{settings.DEEPSEEK_BASE_URL}/v1/user/usage",
-                    headers={"Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}"}
-                )
-                if usage_response.status_code == 200:
-                    data = usage_response.json()
-                    # Look for balance in response
-                    if 'balance' in data:
-                        return float(data['balance'])
-                    elif 'total_balance' in data:
-                        return float(data['total_balance'])
-                    elif 'remaining' in data:
-                        return float(data['remaining'])
-            except Exception as e:
-                print(f"Error fetching usage: {e}")
-            
-            # Try the dashboard endpoint
-            try:
-                dashboard_response = await client.get(
-                    f"{settings.DEEPSEEK_BASE_URL}/v1/dashboard/billing/subscription",
-                    headers={"Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}"}
-                )
-                if dashboard_response.status_code == 200:
-                    data = dashboard_response.json()
-                    if 'balance' in data:
-                        return float(data['balance'])
-            except Exception as e:
-                print(f"Error fetching dashboard: {e}")
-            
+            logger.warning("All balance endpoints failed")
             return None
+            
     except httpx.TimeoutException:
-        print("Timeout while checking DeepSeek balance")
+        logger.error("Timeout while checking DeepSeek balance")
         return None
     except Exception as e:
-        print(f"Error checking DeepSeek balance: {e}")
+        logger.error(f"Error checking DeepSeek balance: {str(e)}", exc_info=True)
         return None
 
 async def save_deepseek_balance(db: AsyncSession, balance: float):

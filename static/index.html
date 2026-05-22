@@ -630,16 +630,24 @@ async function loadSystemStatus() {
 }
 
 async function refreshDeepseekBalance() {
+  var btn = event.target;
+  var originalText = btn.textContent;
+  btn.textContent = '⏳ Refreshing...';
+  btn.disabled = true;
+  
   try {
     var result = await api('POST', '/admin/refresh-balance');
     if (result.success) {
       toast('Balance refreshed: $' + result.balance.toFixed(2), 'success');
       await loadSystemStatus();
     } else {
-      toast('Failed to refresh balance: ' + result.message, 'error');
+      toast('Failed: ' + result.message + '. Check Railway logs for details.', 'error');
     }
   } catch(e) {
-    toast('Error: ' + e.message, 'error');
+    toast('Network error. Please check Railway logs for details.', 'error');
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
 }
 
