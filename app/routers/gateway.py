@@ -223,7 +223,7 @@ _playground_quota = defaultdict(lambda: {"count": 0, "reset_at": 0})
 
 @router.post("/playground/chat")
 async def playground_chat(request: Request):
-    """Free trial chat — rate limited per IP (max 20/day). No auth required."""
+    """Free trial chat — rate limited per IP (max 5/day). Flash model only. No auth required."""
     import time as _time
     now = _time.time()
     ip = request.client.host if request.client else "unknown"
@@ -233,10 +233,10 @@ async def playground_chat(request: Request):
         quota["count"] = 0
         quota["reset_at"] = now + 86400
 
-    if quota["count"] >= 20:
+    if quota["count"] >= 5:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Free trial limit reached (20/day). Please sign up for unlimited access."
+            detail="Free trial limit reached (5/day). Please sign up for unlimited access."
         )
 
     try:
@@ -248,9 +248,7 @@ async def playground_chat(request: Request):
     if not msg or len(msg) > 4000:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Message required (max 4000 chars)")
 
-    model = body.get("model", "deepseek-v4-flash")
-    if model not in ("deepseek-v4-flash", "deepseek-v4-pro"):
-        model = "deepseek-v4-flash"
+    model = "deepseek-v4-flash"
 
     try:
         response = await deepseek_service.chat_completions({
@@ -266,7 +264,7 @@ async def playground_chat(request: Request):
 
     quota["count"] += 1
     content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
-    remaining = max(0, 20 - quota["count"])
+    remaining = max(0, 5 - quota["count"])
 
     return {"reply": content, "model": model, "remaining": remaining}
 

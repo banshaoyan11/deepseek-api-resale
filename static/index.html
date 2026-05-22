@@ -205,11 +205,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <h3>
             <span data-i18n="pg_title">🆓 Try DeepSeek V4 Free</span>
           </h3>
-          <span class="playground-remaining" id="pg-remaining" data-i18n="pg_remaining">20 free messages / day</span>
+          <span class="playground-remaining" id="pg-remaining" data-i18n="pg_remaining">5 free messages / day</span>
         </div>
         <div class="pg-model-pick">
-          <button class="active" onclick="switchPgModel('deepseek-v4-flash', this)" id="pg-btn-flash">DeepSeek V4 Flash</button>
-          <button onclick="switchPgModel('deepseek-v4-pro', this)" id="pg-btn-pro">DeepSeek V4 Pro</button>
+          <button class="active" disabled style="opacity:1;cursor:default;border-color:#6366f1;color:#a78bfa;background:#1a1a3e;">DeepSeek V4 Flash <span style="font-size:0.7em;color:#10b981;">Free</span></button>
+          <button disabled style="opacity:0.5;cursor:not-allowed;">DeepSeek V4 Pro 🔒</button>
         </div>
         <div class="playground-msgs" id="pg-msgs">
           <div class="pg-placeholder" data-i18n="pg_placeholder">Ask anything about coding, writing, or analysis...</div>
@@ -222,7 +222,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <input type="text" id="pg-input" data-i18n-placeholder="pg_input_ph" placeholder="Type your message here..." onkeydown="if(event.key==='Enter') sendPgMessage()">
           <button onclick="sendPgMessage()" id="pg-send-btn">Send</button>
         </div>
-        <p class="i18n-note" style="margin-top:8px;" data-i18n="pg_signup_hint">Want unlimited access? <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#a78bfa;">Sign up</a> and get your own API key.</p>
+        <p class="i18n-note" style="margin-top:8px;" data-i18n="pg_signup_hint">Free trial: 5 messages/day with Flash. <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#a78bfa;">Unlock Pro + unlimited with $1</a></p>
       </div>
     </div>
 
@@ -898,10 +898,10 @@ const I18N = {
     feature_compat_title: 'OpenAI Compatible',
     feature_compat_desc: 'Drop-in replacement. Works with any OpenAI SDK, tool, or client.',
     pg_title: '🆓 Try DeepSeek V4 Free',
-    pg_remaining: '20 free messages / day',
+    pg_remaining: '5 free messages / day',
     pg_placeholder: 'Ask anything about coding, writing, or analysis...',
     pg_input_ph: 'Type your message here...',
-    pg_signup_hint: 'Want unlimited access? Sign up and get your own API key.',
+    pg_signup_hint: 'Free trial: 5 messages/day with Flash. Unlock Pro + unlimited with $1',
     reseller_title: 'How We Compare vs Other Resellers',
     reseller_us: 'Us ★',
     reseller_full: 'Full V4 (not distilled)',
@@ -913,8 +913,8 @@ const I18N = {
     reseller_note: "Most resellers proxy DeepSeek through 3rd-party providers with added markup and rate limits. We connect directly to DeepSeek's official API — you get the real model at the real speed.",
     pg_thinking: 'AI is thinking',
     trial_badge: '🎯 SPECIAL OFFER',
-    trial_title: 'Try Full DeepSeek V4 for Just $1',
-    trial_desc: 'Get ~2 million tokens. No limits, no throttling, full 1M context. Cancel anytime.',
+    trial_title: 'Unlock DeepSeek V4 Pro for $1',
+    trial_desc: 'Get ~2 million tokens with BOTH Flash and Pro models. No limits, no throttling, full 1M context.',
     trial_btn: 'Start $1 Trial →',
     trial_note: 'One-time purchase. No auto-renewal. No hidden fees.',
     member_title: '💎 Membership Plans',
@@ -927,7 +927,7 @@ const I18N = {
     plan_team_name: 'Team',
     plan_team_desc: '~200M tokens · for startups',
     member_footer: 'All plans: unlimited rate, 1M context, OpenAI-compatible API. Sign up to purchase.',
-    auth_promo_text: 'Ready to get started? $1 gives you ~2 million tokens — full speed, full model, no strings attached.',
+    auth_promo_text: 'Ready to get started? $1 unlocks Pro model + ~2 million tokens — full speed, no strings attached.',
     auth_promo_btn: 'Claim $1 Trial'
   },
   zh: {
@@ -1046,10 +1046,10 @@ const I18N = {
     feature_compat_title: 'OpenAI 兼容',
     feature_compat_desc: '开箱即用。兼容所有 OpenAI SDK、工具和客户端。',
     pg_title: '🆓 免费体验 DeepSeek V4',
-    pg_remaining: '每天 20 条免费消息',
+    pg_remaining: '每天 5 条免费消息',
     pg_placeholder: '随便问代码、写作、分析...',
     pg_input_ph: '在这里输入消息...',
-    pg_signup_hint: '想无限使用？注册获取专属 API 密钥。',
+    pg_signup_hint: '免费体验：每天 5 条 Flash 模型消息。$1 解锁 Pro 模型 + 无限使用',
     reseller_title: '与同行的对比',
     reseller_us: '我们 ★',
     reseller_full: '满血 V4（非蒸馏）',
@@ -1061,8 +1061,8 @@ const I18N = {
     reseller_note: '多数转售商通过第三方中转，加价且限速。我们直连 DeepSeek 官方 API — 真正满血，真正全速。',
     pg_thinking: 'AI 正在思考中',
     trial_badge: '🎯 限时特惠',
-    trial_title: '$1 即可体验满血 DeepSeek V4',
-    trial_desc: '约 200 万 tokens。不限速，不缩水，100 万上下文窗口。随时可停。',
+    trial_title: '$1 解锁 DeepSeek V4 Pro 模型',
+    trial_desc: '约 200 万 tokens，Flash 和 Pro 双模型随意用。不限速，不缩水，100 万上下文窗口。',
     trial_btn: '开始 $1 体验 →',
     trial_note: '一次性购买，不自动续费，无隐藏收费。',
     member_title: '💎 会员方案',
@@ -1075,7 +1075,7 @@ const I18N = {
     plan_team_name: '团队包',
     plan_team_desc: '~2亿 tokens · 初创团队',
     member_footer: '所有方案：不限速、100万上下文、OpenAI 兼容。注册即可购买。',
-    auth_promo_text: '准备开始了吗？$1 即可获得约 200 万 tokens — 满血模型，全速访问，无任何附加条件。',
+    auth_promo_text: '准备开始了吗？$1 解锁 Pro 模型 + 约 200 万 tokens — 满血模型，全速访问，无任何附加条件。',
     auth_promo_btn: '领取 $1 体验'
   }
 };
@@ -1083,14 +1083,7 @@ const I18N = {
 function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key; }
 
 // ===== Playground Chat =====
-var pgModel = 'deepseek-v4-flash';
 var pgLoading = false;
-
-function switchPgModel(model, btn) {
-  pgModel = model;
-  document.querySelectorAll('.pg-model-pick button').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-}
 
 function appendPgMsg(role, text) {
   var msgs = document.getElementById('pg-msgs');
@@ -1135,7 +1128,7 @@ async function sendPgMessage() {
     var r = await fetch(API_BASE + '/playground/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, model: pgModel })
+      body: JSON.stringify({ message: msg })
     });
     var data = await r.json();
     thinking.classList.add('hidden');
