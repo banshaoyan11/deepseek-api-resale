@@ -91,7 +91,7 @@ async def get_all_transactions(
     return [{
         "id": t.id,
         "user_id": t.user_id,
-        "type": t.type.value,
+        "type": t.transaction_type.value,
         "amount": t.amount,
         "description": t.description,
         "created_at": t.created_at.isoformat()
