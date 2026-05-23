@@ -1,5 +1,5 @@
 # app/main.py
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -59,10 +59,9 @@ app.include_router(admin_router)
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 
-# Mount static assets (JS, CSS, SVG, etc.)
+# Mount static assets for SPA frontend
 if os.path.exists(STATIC_DIR):
     app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="static_assets")
-    app.mount("/favicon.svg", StaticFiles(directory=STATIC_DIR), name="static_root")
 
 @app.get("/")
 async def root():
@@ -78,6 +77,20 @@ async def dashboard_spa():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {"error": "static files not found"}, 404
+
+@app.get("/favicon.svg")
+async def favicon():
+    path = os.path.join(STATIC_DIR, "favicon.svg")
+    if os.path.exists(path):
+        return FileResponse(path)
+    raise HTTPException(status_code=404)
+
+@app.get("/icons.svg")
+async def icons():
+    path = os.path.join(STATIC_DIR, "icons.svg")
+    if os.path.exists(path):
+        return FileResponse(path)
+    raise HTTPException(status_code=404)
 
 @app.get("/health")
 async def health_check():
