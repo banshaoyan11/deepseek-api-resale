@@ -59,12 +59,25 @@ app.include_router(admin_router)
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 
+# Mount static assets (JS, CSS, SVG, etc.)
+if os.path.exists(STATIC_DIR):
+    app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="static_assets")
+    app.mount("/favicon.svg", StaticFiles(directory=STATIC_DIR), name="static_root")
+
 @app.get("/")
 async def root():
     index_path = os.path.join(STATIC_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {"name": "DeepSeek API Resale Platform", "version": "1.0.0", "status": "operational"}
+
+@app.get("/dashboard")
+async def dashboard_spa():
+    """SPA fallback — serve index.html for React Router paths"""
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"error": "static files not found"}, 404
 
 @app.get("/health")
 async def health_check():
