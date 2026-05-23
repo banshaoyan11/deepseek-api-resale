@@ -70,14 +70,6 @@ async def root():
         return FileResponse(index_path)
     return {"name": "DeepSeek API Resale Platform", "version": "1.0.0", "status": "operational"}
 
-@app.get("/dashboard")
-async def dashboard_spa():
-    """SPA fallback — serve index.html for React Router paths"""
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"error": "static files not found"}, 404
-
 @app.get("/favicon.svg")
 async def favicon():
     path = os.path.join(STATIC_DIR, "favicon.svg")
